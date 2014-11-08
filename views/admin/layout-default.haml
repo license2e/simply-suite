@@ -1,0 +1,25 @@
+!!!
+%html{:lang => "en", "xml:lang" => "en", :xmlns => "http://www.w3.org/1999/xhtml"}
+  %head
+    %meta{:content => "text/html; charset=utf-8", "http-equiv" => "Content-type"}/
+    = title_tag
+    = stylesheet_tags
+    = javascript_tags
+  %body.background-grey-fibre-css3
+    #page.container.container-black
+      = haml :"admin/header"
+      #pusher
+        #content.container-white
+          %h1= title.last
+          #limit
+            %article#article
+              = yield
+            / end #article
+            = haml :"shared/aside"
+            = haml :"shared/banner"
+          / end #limit
+          = haml :"shared/nav"
+        / end #content
+      / end #pusher
+      = haml :"shared/footer"
+    / end #page

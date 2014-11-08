@@ -1,0 +1,31 @@
+%section
+  = styled_flash
+  %form{:id=>"register-form", :method=>"post", :action=>@action_url}
+    .form-item.text
+      %label{:for=>"first_name"}
+        First Name
+      %input.required{:id=>"first_name", :name=>"register[first_name]", :title=>"First Name", :type=>"text", :value=>""}
+    .form-item.text
+      %label{:for=>"last_name"}
+        Last Name
+      %input.required{:id=>"last_name", :name=>"register[last_name]", :title=>"Last Name", :type=>"text", :value=>""}
+    .form-item.text
+      %label{:for=>"email_address"}
+        Email Address
+      %input.required{:id=>"email_address", :name=>"register[login]", :title=>"Email Address", :type=>"text", :value=>""}
+    .form-item.text
+      %label{:for=>"password"}
+        Password
+      %input.required{:id=>"password", :name=>"register[password]", :title=>"Password", :type=>"password", :value=>""}
+    .form-item.text
+      %label{:for=>"confirm_password"}
+        Confirm Password
+      %input.required{:id=>"confirm_password", :name=>"register[confirm_password]", :title=>"Confirm Password", :type=>"password", :value=>""}
+    .form-item.right
+      %input{:name=>"submit", :type=>"submit", :value=>@submit_value}
+
+  - content_for :footer do
+    %section.right
+      %a{:href=>url('/register')} New User?
+      |
+      %a{:href=>url('/forgot')} Forgot password?

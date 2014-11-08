@@ -1,0 +1,38 @@
+/* * /
+@font-face {
+  font-family: 'Cabin Condensed';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Cabin Condensed'), local('CabinCondensed'), url('http://themes.googleusercontent.com/static/fonts/cabincondensed/v2/B0txb0blf2N29WdYPJjMStL_YSxa0Ggq46JEtXTJ0Ts.woff') format('woff');
+}
+@font-face {
+  font-family: 'Cabin Condensed';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Cabin Condensed Bold'), local('CabinCondensed-Bold'), url('http://themes.googleusercontent.com/static/fonts/cabincondensed/v2/Ez4zJbsGr2BgXcNUWBVgEIVuAxNqMQLTd3Copx4ZXM0.woff') format('woff');
+}
+/* */
+@font-face {
+  font-family: 'Rosario';
+  font-style: italic;
+  font-weight: 700;
+  src: local('Rosario Bold Italic'), local('Rosario-BoldItalic'), url('http://themes.googleusercontent.com/static/fonts/rosario/v5/EOgFX2Va5VGrkhn_eDpIRaRDOzjiPcYnFooOUGCOsRk.woff') format('woff');
+}
+@font-face {
+  font-family: 'Rosario';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Rosario Bold'), local('Rosario-Bold'), url('http://themes.googleusercontent.com/static/fonts/rosario/v5/C6vOqPM2grRKaQTsxWhqnL3hpw3pgy2gAi-Ip7WPMi0.woff') format('woff');
+}
+@font-face {
+  font-family: 'Rosario';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Rosario Regular'), local('Rosario-Regular'), url('http://themes.googleusercontent.com/static/fonts/rosario/v5/1czDsfUw1sIxXBq0PGI58ALUuEpTyoUstqEm5AMlJo4.woff') format('woff');
+}
+@font-face {
+  font-family: 'Rosario';
+  font-style: italic;
+  font-weight: normal;
+  src: local('Rosario Italic'), local('Rosario-Italic'), url('http://themes.googleusercontent.com/static/fonts/rosario/v5/qPuMCAX6nBODQfYbsOfqLrO3LdcAZYWl9Si6vvxL-qU.woff') format('woff');
+}

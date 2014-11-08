@@ -1,0 +1,65 @@
+= styled_flash
+%form{:id=>"create-invoice", :method=>"post", :action=>@action_url}
+  .form-item.right.text
+    %label.inline
+      Invoice Number
+    %input.required{:name=>"invoice[num]", :title=>"Invoice Number", :type=>"text", :value=>@invoice.formatted_invoice_num(@client)}
+  .form-item.right.text
+    %label.inline
+      Invoice Date
+    %input.required{:name=>"invoice[invoice_date]", :title=>"Invoice Date", :type=>"text", :value=>@invoice.formatted_invoice_date()}
+  #services.replicate
+    #services-container.clear
+      #services-header.service.clear
+        .form-item.text.service_item
+          Item
+        .form-item.text.service_desc
+          Description
+        .form-item.text.service_date
+          Date
+        .form-item.text.service_qty
+          Quantity
+        .form-item.text.service_cost
+          Unit Cost
+      - @services.each_with_index do |service_item,i|
+        .service.service-count.clear{:id => "services-clone#{((i > 0) ? "-#{rand()}" : '')}"}
+          %input.update-count.service_id{:name=>"invoice[services][#{i}][service_id]", :type=>"hidden", :value=>"#{service_item.id}"}
+          .form-item.text
+            %input.required.service_item.update-count{:name=>"invoice[services][#{i}][item]", :title=>"Item", :type=>"text", :value=>"#{service_item.item}"}
+          .form-item.text
+            %input.service_desc.update-count{:name=>"invoice[services][#{i}][desc]", :title=>"Description", :type=>"text", :value=>"#{service_item.desc}"}
+          .form-item.text
+            %input.service_date.update-count{:name=>"invoice[services][#{i}][service_date]", :title=>"Date", :type=>"text", :value=>"#{service_item.formatted_service_date()}"}
+          .form-item.text
+            %input.required.auto-qty.service_qty.update-count{:name=>"invoice[services][#{i}][qty]", :title=>"Quantity", :type=>"text", :value=>"#{service_item.qty}"}
+          .form-item.text
+            %input.required.auto-total.service_cost.update-count{:name=>"invoice[services][#{i}][cost]", :title=>"Cost", :type=>"text", :value=>"#{service_item.cost}"}
+          .form-item
+            %input.delete{:name=>"delete", :type=>"button", :value=>"x"}
+    #add-one.right
+      %input.add{:id=>"add-one-more", :type=>"button", :value=>"Add Item"}
+  .form-item.right.text
+    %label.inline
+      Total Amount
+    %input#total_amount.required{:name=>"invoice[total_amount]", :title=>"Total Amount", :type=>"text", :value=>@invoice.total_amount}    
+  .form-item.right.text
+    %label.inline
+      Discount Amount
+    %input#total_discount{:name=>"invoice[total_discount]", :title=>"Discount Amount", :type=>"text", :value=>@invoice.total_discount}
+  .form-item.right.text
+    %label.inline
+      Amount Paid
+    %input#amount_paid{:name=>"invoice[amount_paid]", :title=>"Amount Paid", :type=>"text", :value=>@invoice.amount_paid}
+  #terms-and-notes.clear
+    .form-item.block
+      %label
+        Terms
+      %textarea{:name=>"invoice[terms]", :title=>"Terms"}
+        = @invoice.formatted_terms()
+    .form-item.block
+      %label
+        Notes
+      %textarea{:name=>"invoice[notes]", :title=>"Notes"}
+        = @invoice.formatted_notes()
+  .form-item.right
+    %input{:name=>"submit", :type=>"submit", :value=>@submit_value}

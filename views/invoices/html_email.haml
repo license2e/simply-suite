@@ -1,0 +1,24 @@
+%table{:align => "center", :cellpadding => "0", :cellspacing => "0", :style => "background-color:#fff; border: 1px solid #711E31; color: #222;", :width => "600"}
+  %tbody
+    %tr
+      %td{:style => "padding-top:10px;padding-left:20px;padding-bottom:10px;padding-right:20px;", :valign => "bottom", :width => "388"}
+        %h2{:style => "font-family:Arial,Helvetica,sans-serif;font-size:22px;color:#000;margin:0;padding:0px"}
+          EON Media Group, LLC
+      %td{:align => "right", :style => "padding-top:10px;padding-left:20px;padding-bottom:10px;padding-right:20px", :valign => "bottom", :width => "170"}
+        %img{:alt => "EON Media Group, LLC", :src => "http://static.eonmediagroup.com/css/images/logo-w110.jpg", :style => "display:block", :width => "110"}/
+    %tr
+      %td{:colspan => "2", :height => "2", :style => "font-size:1px;line-height:1px;background-color:#8C253C;"}
+        \&nbsp;
+    %tr
+      %td{:colspan => "2", :style => "padding-left:20px;padding-right:20px;padding-top: 45px;padding-bottom: 45px;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#000;line-height:20px"}
+        Attached is a PDF copy of your invoice from EON Media Group for
+        = "$#{@invoice.formatted_final_amount} USD."
+        %br/
+        Please don't hesitate to contact us if you have any questions or concerns.
+        %br/
+        %br/
+        Best regards,
+        %br/
+        EON Media Group (
+        %a{:href => "mailto:invoices@eonmediagroup.com", :target => "_blank", :style=>"color: #C02950;"}> invoices@eonmediagroup.com
+        )

@@ -1,0 +1,14 @@
+- if content_for? :footer
+  %footer#footer
+    = yield_content :footer
+    / %nav#footernav
+    / end #footernav
+    / #affiliations
+    / end #affiliations
+    / #copyright
+    / end #copyright
+    / #footnotes
+    / end #footnotes
+    / #disclaimers
+    / end #disclaimers
+  / end #footer

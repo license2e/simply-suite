@@ -1,0 +1,40 @@
+= styled_flash
+%form{:id=>"create-client", :method=>"post", :action=>@action_url}
+  .form-item.text
+    %label.inline
+      Prefix (AAAAAA######)
+    %input.required{:name=>"client[client_prefix]", :title=>"Prefix", :type=>"text", :maxlength=>12, :value=>@client.client_prefix}
+  .form-item.text
+    %label.inline
+      Name
+    %input.required{:name => "client[name]", :title => "Name", :type => "text", :value => @client.name}
+  .form-item.text
+    %label.inline
+      Contact
+    %input.required{:name => "client[contact]", :title => "Contact", :type => "text", :value => @client.contact}
+  .form-item.text
+    %label.inline
+      Email
+    %input.required{:name => "client[email]", :title=>"Email", :type=>"text", :value=>@client.email}
+  .form-item.text
+    %label.inline
+      Street
+    %input.required{:name=>"client[street]", :title=>"Street", :type=>"text", :value=>@client.street}
+  .form-item.text
+    %label.inline
+      Street 2
+    %input{:name=>"client[street2]", :title=>"Street 2", :type=>"text", :value=>@client.street2}
+  .form-item.text
+    %label.inline
+      City
+    %input.required{:name=>"client[city]", :title=>"Name", :type=>"text", :value=>@client.city}
+  .form-item.text
+    %label.inline
+      State
+    %input.required{:name=>"client[state]", :title=>"Name", :type=>"text", :value=>@client.state}
+  .form-item.text
+    %label.inline
+      Zip
+    %input.required{:name=>"client[zip]", :title=>"Name", :type=>"text", :value=>@client.zip}
+  .form-item.right
+    %input{:name=>"submit", :type=>"submit", :value=>@submit_value}

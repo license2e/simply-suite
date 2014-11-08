@@ -1,0 +1,46 @@
+%section
+  = styled_flash
+  #client-view-buttons
+    %a{:href=>url("/")}= "&laquo; Client List"
+  #client-container
+    #client-key
+      %strong
+        Key:
+      ="#{@client.client_key}"
+    #client-prefix
+      %strong
+        Prefix:
+      ="#{@client.client_prefix}"
+    #client-name
+      %strong
+        Name:
+      ="#{@client.name}"
+    #client-contact
+      %strong
+        Contact:
+      ="#{@client.contact}"
+    #client-email
+      %strong
+        Email:
+      ="#{@client.email}"
+    #client-street
+      %strong
+        Street:
+      ="#{@client.street}"
+    - if !@client.street2.nil? && !@client.street2.empty? then 
+      #client-street2
+        %strong
+          Street 2:
+        ="#{@client.street2}"
+    #client-city
+      %strong
+        City:
+      ="#{@client.city}"
+    #client-state
+      %strong
+        State:
+      ="#{@client.state}"
+    #client-zip
+      %strong
+        Zip:
+      ="#{@client.zip}"

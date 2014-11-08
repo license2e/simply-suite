@@ -1,0 +1,41 @@
+%section  
+  = styled_flash
+  %p.right
+    %a{:href=>url("/create")} Add New Client
+  - if @clients != nil && @clients != [] then
+    %table#client-list.list
+      %tr.headers
+        %th
+          Key
+        %th
+          Prefix
+        %th
+          Client
+        %th
+          Contact
+        %th
+          Email
+        %th.center
+          \&nbsp;
+        %th.center
+          \&nbsp;
+      - @clients.each_with_index do |client, i|
+        %tr{:class=>"#{(i % 2 == 0 ? "odd" : "even")}"}
+          %td
+            %a{:href=>url("/view/#{client.client_key}")}= "#{client.client_key}"
+          %td
+            = "#{client.client_prefix}"
+          %td
+            = "#{client.name}"
+          %td
+            = "#{client.contact}"
+          %td
+            = "#{client.email}"
+          %td.center
+            %a{:href=>url("/edit/#{client.client_key}")} Edit
+          %td.center
+            %a{:href=>("/invoices/#{client.client_key}")} Invoices
+  - else
+    .small.not-found
+      %em
+        No clients found

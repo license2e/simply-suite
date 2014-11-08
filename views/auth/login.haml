@@ -1,0 +1,13 @@
+%section
+  = styled_flash
+  %form{:id=>"login-form", :method=>"post", :action=>@action_url}
+    .form-item.auto-title
+      %input.required{:name=>"login[login]", :title=>"Email Address", :type=>"text", :value=>""}
+    .form-item.auto-title
+      %input.required{:name=>"login[password]", :title=>"Password", :type=>"password", :value=>""}
+    .form-item.right
+      %input{:name=>"submit", :type=>"submit", :value=>@submit_value}
+
+- content_for :footer do
+  %section.right
+    \&nbsp;

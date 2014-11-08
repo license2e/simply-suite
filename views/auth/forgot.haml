@@ -1,0 +1,7 @@
+%section
+  = styled_flash
+  %form{:id=>"forgot-form", :method=>"post", :action=>@action_url}
+    .form-item.auto-title
+      %input.required{:name=>"forgot[login]", :title=>"Email Address", :type=>"text", :value=>""}
+    .form-item.right
+      %input{:name=>"submit", :type=>"submit", :value=>@submit_value}

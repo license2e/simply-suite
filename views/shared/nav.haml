@@ -1,0 +1,20 @@
+%nav#nav
+  / #breadcrumbs
+  / end #breadcrumbs
+  #global
+    %ul      
+      %li
+        %a{:href=>"/"} Home
+      %li.last
+        %a{:href=>"/clients"} Clients
+  / end #global
+  #universal
+    %ul
+      %li.last
+        %a{:href=>"/login/logout"} Logout
+  / end #universal
+  / #utilities
+  / end #utilities
+  / #tools
+  / end #tools
+/ end #nav

@@ -1,0 +1,141 @@
+%section
+  = styled_flash
+  #client-view-buttons
+    %a{:href=>url("/#{@invoice.client.client_key}")}= "&laquo; #{@invoice.client.name} Invoices"
+  #invoice-view-buttons.right
+    - if @invoice.approved_on.nil? then
+      %a{:href=>url("/approve/#{@invoice.id}")}= "Approve"
+    - elsif @invoice.paid_at.nil? then
+      %a{:href=>url("/send/#{@invoice.id}")}= "Send to: #{@invoice.client.email}"
+    = " | " 
+    %a{:href=>"#{@pdf_invoice_path}", :target=>"_blank"} Download PDF
+  #invoice-view-status.center
+    - if @invoice.approved_on.nil? then
+      = "Needs approval"
+    - elsif @invoice.sent_at.nil? then
+      = "Auto send on or after: #{@invoice.formatted_invoice_date()} @ 1am"
+    - elsif @invoice.paid_at.nil? then
+      %a{:href=>url("/paid/#{@invoice.id}")}= "Set Status Paid"  
+    - else
+      = "Paid on: #{@invoice.formatted_paid_date()}"
+  %br.clear
+  #invoice-view-container
+    #invoice-view
+      .float-right
+        %img#invoice-logo{:src=>@logopath, :title=>"Logo"}
+      #your-address
+        EON Media Group, LLC
+        %br/
+        1800 Camden Rd. Suite 107/123
+        %br/
+        Charlotte, NC 28203
+      %table#invoice-header.float-right
+        %tr
+          %td
+            Invoice #
+          %td.right
+            = "#{@invoice.client.client_prefix}-#{@invoice.num}"
+        %tr
+          %td
+            Invoice Date
+          %td.right
+            = "#{@invoice.formatted_invoice_date()}"
+        %tr
+          %th
+            Balance
+          %th.right
+            = "$#{@invoice.formatted_final_amount()} USD"
+      #client-address
+        = "#{@invoice.client.name}"
+        %br/
+        = "#{@invoice.client.contact}"
+        %br/
+        = "#{@invoice.client.street} #{@invoice.client.street2}"
+        %br/
+        = "#{@invoice.client.city}, #{@invoice.client.state} #{@invoice.client.zip}"
+      %table#invoice-services
+        %tr
+          %th.service_item
+            Item
+          %th.service_desc.middle
+            Description
+          %th.service_cost.right.middle
+            Unit Cost
+          %th.service_qty.right.middle
+            Quantity
+          %th.service_total.right
+            Line Total
+        - @invoice.services.each do |service|
+          %tr.service
+            %td.service_item
+              = "#{service.item}"
+            %td.service_desc
+              = "#{service.desc}"
+            %td.service_cost.right
+              = "$#{service.formatted_cost()}"
+            %td.service_qty.right
+              = "#{service.qty}"
+            %td.service_total.right
+              = "$#{service.formatted_line_total()}"
+        %tr.last
+          %td.service_item
+            = "&nbsp;"
+          %td.service_desc
+            = "&nbsp;"
+          %td.service_cost.right
+            = "&nbsp;"
+          %td.service_qty.right
+            = "&nbsp;"
+          %td.service_total.right
+            = "&nbsp;"   
+      %table#invoice-total.float-right
+        - if @invoice.total_discount > 0.0 then
+          %tr.strong
+            %td
+              Sub Total
+            %td.right
+              = "$#{@invoice.formatted_total_amount()}"
+          %tr
+            %td
+              Discount 
+              = "-#{@invoice.formatted_discount_percentage()}%"
+            %td.right
+              = "-$#{@invoice.formatted_total_discount()}"
+          %tr.strong.top-border
+            %td
+              Invoice Total
+            %td.right
+              = "$#{@invoice.formatted_discount_total_amount()}"
+        - else
+          %tr.strong
+            %td
+              Invoice Total
+            %td.right
+              = "$#{@invoice.formatted_total_amount()}"
+        %tr
+          %td
+            Amount Paid
+          %td.right
+            = "-$#{@invoice.formatted_amount_paid()}"
+        %tr
+          %th
+            Balance
+          %th.right
+            = "$#{@invoice.formatted_final_amount()} USD"
+      %br.clear/
+      %table#invoice-terms
+        %tr
+          %td.strong
+            Terms
+        %tr
+          %td
+            = "#{@invoice.terms}"
+      %table#invoice-notes
+        %tr
+          %td.strong
+            Notes
+        %tr
+          %td
+            = "#{@invoice.notes}"
+    #invoice-status-ribbon{:class=>@invoice.get_status()}
+      = "#{@invoice.get_status()}"

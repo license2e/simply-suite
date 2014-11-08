@@ -1,0 +1,51 @@
+%section
+  = styled_flash
+  - if @client != nil
+    %p.right
+      %a{:href=>url("/create/#{@client.client_key}")} Create New Invoice
+    - if @invoices != nil && @invoices != [] then
+      %table#invoice-list.list
+        %tr.headers
+          %th
+            Invoice
+          %th
+            Service Item
+          %th
+            Service Description
+          %th.right
+            Invoice Date
+          %th.right
+            Invoice Total
+          %th.center
+            Status
+          %th.right
+            \&nbsp;
+        - @invoices.each_with_index do |invoice, i|
+          %tr{:class=>"#{(i % 2 == 0 ? "odd" : "even")}"}
+            %td
+              %a{:href=>url("/view/#{invoice.id}")}
+                = "#{invoice.client.client_prefix}-#{invoice.num}"
+            %td
+              = "#{invoice.services.first.item}"
+            %td
+              = "#{invoice.services.first.desc}"
+            %td.right
+              = "#{invoice.formatted_invoice_date()}"
+            %td.right
+              = "$#{invoice.formatted_final_amount()} USD"
+            %td{:class=>"status center #{invoice.get_status()}"}
+              = "#{invoice.get_status()}"
+            %td.right
+              - if invoice.editable? then
+                %a{:href=>url("/edit/#{invoice.id}")}
+                  Edit
+              - else
+                \&nbsp;
+    - else
+      .small.not-found
+        %em
+          No invoices found, please add one
+  - else
+    .small.not-found
+      %em
+        No clients selected
