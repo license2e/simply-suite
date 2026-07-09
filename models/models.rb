@@ -27,6 +27,7 @@ end
 class Invoice < Sequel::Model
   include Formattable
   plugin :timestamps, update_on_create: true
+  plugin :validation_helpers
 
   many_to_one :client
   one_to_many :services
@@ -108,6 +109,7 @@ end
 class Service < Sequel::Model
   include Formattable
   plugin :timestamps, update_on_create: true
+  plugin :validation_helpers
 
   many_to_one :invoice
 
@@ -126,16 +128,19 @@ end
 
 class Division < Sequel::Model
   plugin :timestamps, update_on_create: true
+  plugin :validation_helpers
   one_to_many :categories
 end
 
 class Category < Sequel::Model
   plugin :timestamps, update_on_create: true
+  plugin :validation_helpers
   many_to_one :division
   one_to_many :billing_codes
 end
 
 class BillingCode < Sequel::Model
   plugin :timestamps, update_on_create: true
+  plugin :validation_helpers
   many_to_one :category
 end

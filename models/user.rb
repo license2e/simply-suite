@@ -2,6 +2,7 @@ require 'bcrypt'
 
 class User < Sequel::Model
   plugin :timestamps, update_on_create: true
+  plugin :validation_helpers
 
   def self.authenticate(login, password)
     user = first(login: login)
