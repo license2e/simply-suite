@@ -90,6 +90,23 @@ Sends all approved, unsent, past-due invoices. Intended to be run as a cron job.
 
     bundle exec ruby scripts/send_approve_invoices.rb
 
+### Generate PDF from a JSON file
+
+Generate an invoice PDF from a JSON file without running the app or touching a database.
+The PDF is saved alongside the JSON file with the same basename.
+
+    bundle exec ruby scripts/invoice_from_json.rb path/to/invoice.json
+
+**Getting started:**
+
+    cp docs/invoice-template.json my-invoice.json
+    # edit my-invoice.json — fill in your company, client, services, and logo path
+    bundle exec ruby scripts/invoice_from_json.rb my-invoice.json
+    # → my-invoice.pdf
+
+The `logo` field in the JSON is a path to an image file (relative to where you run
+the script, or absolute). Leave it as an empty string to omit the logo.
+
 ### Generate sample invoice PDF
 
 Generates `docs/sample-invoice.pdf` using the app's PDF renderer with demo data.

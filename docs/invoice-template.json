@@ -1,0 +1,45 @@
+{
+  "logo": "public/css/images/logo.png",
+  "from": {
+    "company": "Your Company, LLC",
+    "address": "123 Main St, Suite 100",
+    "city_state_zip": "Charlotte, NC 28203"
+  },
+  "bill_to": {
+    "name": "Acme Corporation",
+    "contact": "Jane Smith",
+    "street": "456 Client Ave",
+    "street2": "",
+    "city": "Charlotte",
+    "state": "NC",
+    "zip": "28203"
+  },
+  "invoice": {
+    "number": "ACM-001",
+    "date": "2026-07-09",
+    "terms": "Net 30 days",
+    "notes": "Thank you for your business. Payment is due within 30 days."
+  },
+  "services": [
+    {
+      "item": "Strategy",
+      "description": "Digital strategy & brand audit",
+      "qty": 1,
+      "unit_cost": 1500.00
+    },
+    {
+      "item": "Design",
+      "description": "UI/UX design for 10 core screens",
+      "qty": 1,
+      "unit_cost": 2000.00
+    },
+    {
+      "item": "Development",
+      "description": "Frontend development @ $125/hr",
+      "qty": 10,
+      "unit_cost": 125.00
+    }
+  ],
+  "discount_percentage": 0,
+  "amount_paid": 0.00
+}
