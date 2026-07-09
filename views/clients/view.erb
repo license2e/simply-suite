@@ -1,0 +1,27 @@
+<div class="max-w-2xl space-y-6">
+  <div class="flex gap-3">
+    <a href="/clients/edit/<%= @client.client_key %>"
+      class="px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white text-sm font-medium rounded-md transition-colors">Edit</a>
+    <a href="/invoices/<%= @client.client_key %>"
+      class="px-4 py-2 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 text-sm font-medium rounded-md transition-colors">Invoices</a>
+  </div>
+
+  <div class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+    <% {
+      'Client Key'   => @client.client_key,
+      'Prefix'       => @client.client_prefix,
+      'Name'         => @client.name,
+      'Contact'      => @client.contact,
+      'Email'        => @client.email,
+      'Street'       => [@client.street, @client.street2].reject(&:nil?).join(', '),
+      'City'         => @client.city,
+      'State'        => @client.state,
+      'ZIP'          => @client.zip,
+    }.each do |label, value| %>
+      <div class="px-5 py-3 flex">
+        <span class="w-32 text-xs font-medium text-gray-500 uppercase tracking-wider pt-0.5"><%= label %></span>
+        <span class="text-sm text-gray-900"><%= value %></span>
+      </div>
+    <% end %>
+  </div>
+</div>
