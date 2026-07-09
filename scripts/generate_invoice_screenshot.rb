@@ -143,6 +143,16 @@ begin
   browser.goto("http://127.0.0.1:#{PORT}/invoices/view/#{invoice.id}")
   sleep 1.5
 
+  # Remove fixed-height/overflow constraints so full page height is captured
+  browser.execute(<<~JS)
+    document.body.style.height = 'auto';
+    document.body.style.overflow = 'visible';
+    const inner = document.querySelector('body > div.flex-1');
+    if (inner) { inner.style.overflow = 'visible'; inner.style.height = 'auto'; }
+    const main = document.querySelector('main');
+    if (main) { main.style.overflow = 'visible'; main.style.height = 'auto'; }
+  JS
+
   # Take screenshot
   FileUtils.mkdir_p('docs')
   browser.screenshot(path: 'docs/invoice-screenshot.png', full: true)
