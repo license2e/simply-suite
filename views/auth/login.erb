@@ -1,0 +1,22 @@
+<div class="bg-white rounded-xl shadow-xl p-8">
+  <div class="mb-8 text-center">
+    <h2 class="text-2xl font-bold text-gray-900">Simply Suite</h2>
+    <p class="mt-1 text-sm text-gray-500">Sign in to continue</p>
+  </div>
+  <form action="<%= @action_url %>" method="post" class="space-y-5">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+      <input type="text" name="login[login]" required placeholder="Username"
+        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-sm">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+      <input type="password" name="login[password]" required placeholder="Password"
+        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-sm">
+    </div>
+    <button type="submit"
+      class="w-full py-2 px-4 bg-slate-700 hover:bg-slate-800 text-white text-sm font-medium rounded-md transition-colors">
+      <%= @submit_value %>
+    </button>
+  </form>
+</div>

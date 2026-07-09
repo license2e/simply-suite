@@ -1,0 +1,8 @@
+<div class="text-center">
+  <p class="text-6xl font-bold text-gray-200">500</p>
+  <h2 class="mt-4 text-xl font-semibold text-gray-700">Something went wrong</h2>
+  <% if env['sinatra.error'] %>
+    <pre class="mt-4 text-left text-xs bg-gray-100 p-4 rounded overflow-auto max-h-64"><%= env['sinatra.error'].message %></pre>
+  <% end %>
+  <a href="/" class="mt-6 inline-block text-sm text-slate-600 hover:text-slate-900 underline">Go to dashboard</a>
+</div>
