@@ -60,18 +60,17 @@ require 'prawn'
 require 'prawn/table'
 
 public_path      = File.expand_path('../public', __dir__)
-logopath_local   = File.join(public_path, '/css/images/logo.png')
+logopath_local   = File.join(public_path, 'css/images/logo.png')
 address_x        = 35
 invoice_header_x = 325
 lineheight_y     = 12
 font_size        = 9
 font_width_assumed = 5
 
-pdf_dir  = File.join(public_path, "pdfs/#{client.client_key}")
-FileUtils.mkdir_p(pdf_dir)
-pdf_file = File.join(pdf_dir, "#{client.client_prefix}-#{invoice.num}.pdf")
+dest = File.expand_path('../docs/sample-invoice.pdf', __dir__)
+FileUtils.mkdir_p(File.dirname(dest))
 
-Prawn::Document.generate(pdf_file) do |pdf|
+Prawn::Document.generate(dest) do |pdf|
   pdf.move_down 25
   pdf.font 'Helvetica'
   pdf.font_size font_size
@@ -182,9 +181,6 @@ Prawn::Document.generate(pdf_file) do |pdf|
   pdf.text_box page_num, at: [(pdf.bounds.width - (page_num.length * font_width_assumed)), 10]
 end
 
-dest = File.expand_path('../docs/sample-invoice.pdf', __dir__)
-FileUtils.mkdir_p(File.dirname(dest))
-FileUtils.cp(pdf_file, dest)
 puts "PDF saved to docs/sample-invoice.pdf"
 
 File.delete('db/screenshot.sqlite3') if File.exist?('db/screenshot.sqlite3')
