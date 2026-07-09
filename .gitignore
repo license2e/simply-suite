@@ -1,8 +1,7 @@
-*.DS_Store
-public/pdfs/*
-.bundle
-Gemfile.lock
-tmp/*
-logs/*.log
-config/app_settings*
+.env
+logs/
+public/pdfs/
+public/css/tailwind.css
+tailwindcss
+db/*.sqlite3
 
