@@ -1,19 +1,16 @@
-class User
-  include DataMapper::Resource
-  include Sinatra::SessionAuth::ModelHelpers
-  
-  property :id, Serial
-  property :login, String
-  property :salt, String
-  property :hashed_password, String
-  property :first_name, String
-  property :last_name, String
-  property :is_admin, Boolean, :default => false
-  property :lastlogin_at, DateTime
-  
-  property :created_at, DateTime
-  property :created_on, Date
-  property :updated_at, DateTime
-  property :updated_on, Date
+require 'bcrypt'
+
+class User < Sequel::Model
+  plugin :timestamps, update_on_create: true
+
+  def self.authenticate(login, password)
+    user = first(login: login)
+    return nil unless user
+    return nil unless BCrypt::Password.new(user.hashed_password) == password
+    user
+  end
+
+  def password=(new_password)
+    self.hashed_password = BCrypt::Password.create(new_password).to_s
+  end
 end
-#User.auto_migrate! #unless User.storage_exists?
