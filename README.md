@@ -1,125 +1,91 @@
 # Simply Suite
 
-A Sinatra-based invoicing and client management web application. Manage clients, create invoices, generate PDFs, and email invoices to clients.
+A Sinatra-based invoicing and client management app. Manage clients, create
+invoices, generate PDFs, and email invoices to clients.
 
-## Features
+## Stack
 
-- Client management (create, view, edit)
-- Invoice creation with line-item services
-- PDF invoice generation (via Prawn)
-- Invoice lifecycle: draft → approved → sent → paid
-- Email delivery of invoices (via ActionMailer)
-- Session-based authentication
+Ruby 3.3 · Sinatra 4 · Sequel ORM · SQLite (default) or MySQL · Puma ·
+Tailwind CSS · Hotwire (Turbo + Stimulus)
 
 ## Requirements
 
-- Ruby (1.9.x era — compatible with the pinned gem versions)
-- MySQL
+- Ruby 3.3
 - Bundler
+- SQLite3 (default) or MySQL
+- The Tailwind standalone CLI binary (see Setup)
 
 ## Setup
 
-### 1. Install dependencies
+### 1. Install gems
 
-```bash
-bundle install
-```
+    bundle install
 
-### 2. Create the logs directory
+### 2. Configure environment
 
-The app writes logs to `logs/` at startup and will crash if it doesn't exist:
+    cp .env.example .env
 
-```bash
-mkdir -p logs
-```
+Edit `.env` — at minimum set:
 
-### 3. Configure the database
+    DATABASE_URL=sqlite://./db/development.sqlite3
+    SESSION_SECRET=any_long_random_string
 
-Edit `config/_app_settings.rb` and set your MySQL credentials and environment:
+To use MySQL instead: `DATABASE_URL=mysql2://user:pass@host/dbname`
 
-```ruby
-ENV['RACK_ENV'] = "development"   # or "production"
-ENV['DATABASE_URL'] = "mysql://username:password@host/dbname"
-```
+Leave SMTP vars blank to disable email sending (the Send button will be
+greyed out in the UI).
 
-There is no `.env` file — configuration is done directly in this file.
+### 3. Download the Tailwind standalone CLI
 
-### 4. Set up the database
+    curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64
+    chmod +x tailwindcss-linux-x64
+    mv tailwindcss-linux-x64 tailwindcss
 
-On first run in development mode, DataMapper will auto-migrate tables. You can also trigger a manual upgrade via the admin route once logged in:
+### 4. Run migrations
 
-```
-GET /upgrade-db
-```
+    bundle exec ruby db/migrate.rb
 
-### 5. Create a user
+### 6. Create an admin user
 
-There is no public registration flow (it is commented out in `app/auth.rb`). You'll need to insert a user record directly into the database, or temporarily uncomment the registration routes in `app/auth.rb` to create the first admin user.
+    bundle exec ruby db/seeds.rb
 
-The `User` model uses `Sinatra::SessionAuth::ModelHelpers` for password hashing — the `hashed_password` and `salt` fields are managed by that gem.
+### 7. Build Tailwind CSS
 
-### 6. Add a logo
+    ./tailwindcss -i public/css/input.css -o public/css/tailwind.css
 
-Invoice PDFs expect a logo image at:
+## Running
 
-```
-public/css/images/logo.png
-```
+    bundle exec foreman start
 
-Place your logo there before generating any invoices.
+Or manually:
 
-## Running the app
+    bundle exec puma -p 9393 -R config.ru   # web server
+    ./tailwindcss -i public/css/input.css -o public/css/tailwind.css --watch  # CSS watcher
 
-```bash
-bundle exec thin -p 9393 -R config.ru start
-```
-
-Or via Foreman/Procfile:
-
-```bash
-foreman start
-```
-
-The app will be available at `http://localhost:9393`.
+App runs at http://localhost:9393
 
 ## Routes
 
 | Path | Description |
 |------|-------------|
-| `/` | Admin dashboard (requires login) |
+| `/` | Dashboard (requires login) |
 | `/login` | Login / logout |
-| `/clients` | List, create, and edit clients |
+| `/clients` | List, create, edit clients |
 | `/invoices/:client_key` | List invoices for a client |
-| `/invoices/create/:client_key` | Create a new invoice |
-| `/invoices/view/:id` | View invoice with PDF link |
-| `/invoices/approve/:id` | Mark invoice approved |
-| `/invoices/send/:id` | Email invoice to client |
-| `/invoices/paid/:id` | Mark invoice paid |
+| `/invoices/create/:client_key` | New invoice |
+| `/invoices/view/:id` | View invoice + PDF |
+| `/invoices/approve/:id` | Approve invoice |
+| `/invoices/send/:id` | Email invoice (requires SMTP config) |
+| `/invoices/paid/:id` | Mark as paid |
 
-## Batch invoice sending
+## Batch invoice sending (cron)
 
-To send all approved, unsent, past-due invoices via cron:
+    ruby scripts/send_approve_invoices.rb
 
-```bash
-ruby scripts/send_approve_invoices.rb
-```
+Sends all approved, unsent, past-due invoices.
 
-## Deployment
+## Database
 
-Deployment uses Capistrano. Fill in the server roles in `config/deploy.rb`, then:
+Schema is managed via migrations in `db/migrations/`. To apply:
 
-```bash
-cap deploy:update
-```
-
-## Directory structure
-
-```
-app/          # Sinatra app classes (admin, auth, clients, invoices)
-config/       # App settings and Capistrano deploy config
-models/       # DataMapper models (User, Client, Invoice, Service)
-views/        # HAML templates
-public/       # Static assets and generated PDFs (public/pdfs/)
-scripts/      # Standalone scripts for cron jobs
-logs/         # Runtime logs (must be created manually)
-```
+    bundle exec ruby db/migrate.rb

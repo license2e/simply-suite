@@ -1,84 +1,59 @@
-# Setup root path
 root = File.dirname(File.dirname(__FILE__))
-config_path = File.expand_path("config", root)
-$:.unshift config_path
+$:.unshift File.join(root, 'lib')
+$:.unshift File.join(root, 'config')
 
-require 'app_settings'
-#script_log_path = File.join(root, 'logs/script-debug.log')
+require 'dotenv'
+Dotenv.load(File.join(root, '.env'))
 
-#log = File.new(script_log_path, "a")
-#STDOUT.reopen(log)
-#STDERR.reopen(log)
+require 'sequel'
+DB = Sequel.connect(ENV.fetch('DATABASE_URL'))
 
-require 'rubygems'
-require 'haml'
-require 'data_mapper'
-require 'action_mailer'
-
-puts ""
-puts "Started processing script: #{Time.now.strftime("%m/%d/%Y %H:%M:%S")}"
-puts ""
-
-# Setup paths
-public_path = File.join(root, '/public')
-models_path = File.join(root,'/models/models.rb')
-configure_path = File.join(root,'/lib/app/configure.rb')
-mailman_path = File.join(root,'/lib/app/mailman.rb')
-datamapper_log_path = File.join(root,'logs/datamapper-debug.log')
-haml_html_path = File.join(root,'views/invoices/html_email.haml')
-haml_text_path = File.join(root,'views/invoices/text_email.haml')
-
-# Email & Database defaults
-require configure_path
-
-# Database local
-require models_path
-DataMapper::Logger.new(datamapper_log_path, :debug)
-#DataMapper.auto_upgrade!
-DataMapper::Model.raise_on_save_failure = true
-DataMapper.finalize
-
-#=begin
-
-invoices = Invoice.all(:is_complete => true, :approved_on.not => nil, :sent_at => nil, :paid_at => nil, :invoice_date.lt => Time.now )
-
-if invoices != [] then
-  # Mailman
-  require mailman_path
-  
-  puts "starting [ "
-  
-  invoices.each do |invoice|
-    
-    email_options = {}
-    email_options[:invoice] = invoice
-    email_options[:html_body] = Haml::Engine.new(File.read(haml_html_path)).render(Object.new, {:@invoice => invoice})
-    email_options[:text_body] = Haml::Engine.new(File.read(haml_text_path)).render(Object.new, {:@invoice => invoice})
-    email_options[:public_path] = public_path
-        
-    Mailman.invoice(email_options).deliver
-    puts " sent: #{invoice.client.client_prefix}-#{invoice.num} - $#{invoice.formatted_final_amount} USD to #{invoice.client.email}"
-    
-    if invoice.sent_at.nil? then
-      begin
-        invoice.update({:sent_at => Time.now})
-      rescue DataMapper::SaveFailureError => e
-        raise "#{e.to_s} -- validation(s): #{invoice.errors.values.join(', ')}"
-      rescue StandardError => e
-        raise "#{e.to_s}"
-      end
-    end
-    
+require 'mail'
+if ENV['SMTP_HOST'] && !ENV['SMTP_HOST'].empty?
+  Mail.defaults do
+    delivery_method :smtp, {
+      address:              ENV['SMTP_HOST'],
+      port:                 (ENV['SMTP_PORT'] || 587).to_i,
+      user_name:            ENV['SMTP_USERNAME'],
+      password:             ENV['SMTP_PASSWORD'],
+      enable_starttls_auto: true
+    }
   end
-
-else 
-  
-  puts "none to process [ "
-  
 end
-#=end
 
-puts "] done!"
-puts ""
-puts "Ended processing script: #{Time.now.strftime("%m/%d/%Y %H:%M:%S")}"
-puts ""
+require_relative '../models/models'
+require 'mailer'
+
+views_root = File.join(root, 'views')
+
+puts "Started: #{Time.now.strftime("%m/%d/%Y %H:%M:%S")}"
+
+invoices = Invoice.where(
+  is_complete: true,
+  sent_at: nil,
+  paid_at: nil
+).exclude(approved_on: nil).where { invoice_date < Time.now }.all
+
+if invoices.empty?
+  puts "None to process."
+else
+  invoices.each do |invoice|
+    ctx = Object.new
+    ctx.instance_variable_set(:@invoice, invoice)
+    b = ctx.instance_eval { binding }
+    html_body = ERB.new(File.read(File.join(views_root, 'invoices/html_email.erb'))).result(b)
+    text_body = ERB.new(File.read(File.join(views_root, 'invoices/text_email.erb'))).result(b)
+    public_path = File.join(root, 'public')
+
+    web_path  = "/pdfs/#{invoice.client.client_key}"
+    local_dir = File.join(public_path, web_path)
+    filename  = "#{invoice.client.client_prefix}-#{invoice.num}.pdf"
+    pdf_path  = File.join(local_dir, filename)
+
+    Mailer.invoice(invoice, html_body: html_body, text_body: text_body, pdf_path: pdf_path)
+    puts "  Sent: #{invoice.client.client_prefix}-#{invoice.num} to #{invoice.client.email}"
+    invoice.update(sent_at: Time.now) if invoice.sent_at.nil?
+  end
+end
+
+puts "Done: #{Time.now.strftime("%m/%d/%Y %H:%M:%S")}"
