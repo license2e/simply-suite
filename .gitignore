@@ -6,3 +6,4 @@ tailwindcss
 db/*.sqlite3
 docs/invoice-screenshot.png
 db/screenshot.sqlite3
+.bundle/

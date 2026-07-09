@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-ruby '3.3'
+ruby '~> 3.3'
 
 gem 'puma'
 gem 'sinatra', '~> 4.0'
@@ -10,7 +10,10 @@ gem 'rack-protection'
 
 gem 'sequel'
 gem 'sqlite3', '~> 2.0'
-gem 'mysql2'
+
+group :mysql do
+  gem 'mysql2'
+end
 
 gem 'dotenv'
 gem 'bcrypt'

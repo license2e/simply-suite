@@ -3,8 +3,8 @@ require 'spec_helper'
 RSpec.describe 'Invoices' do
   let(:combined_app) do
     Rack::Builder.new do
-      map '/login' { run Auth }
-      map '/invoices' { run Invoices }
+      map('/login') { run Auth }
+      map('/invoices') { run Invoices }
     end
   end
 

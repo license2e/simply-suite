@@ -4,8 +4,8 @@ RSpec.describe 'Clients' do
   # Build a combined rack app that shares sessions between Auth and Clients
   let(:combined_app) do
     Rack::Builder.new do
-      map '/login' { run Auth }
-      map '/clients' { run Clients }
+      map('/login') { run Auth }
+      map('/clients') { run Clients }
     end
   end
 

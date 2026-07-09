@@ -3,6 +3,8 @@
 A Sinatra-based invoicing and client management app. Manage clients, create
 invoices, generate PDFs, and email invoices to clients.
 
+![Invoice view](docs/invoice-screenshot.png)
+
 ## Stack
 
 Ruby 3.3 · Sinatra 4 · Sequel ORM · SQLite (default) or MySQL · Puma ·

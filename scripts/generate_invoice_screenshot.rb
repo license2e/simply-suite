@@ -9,7 +9,7 @@ Dotenv.load
 
 # Use a dedicated screenshot database
 ENV['DATABASE_URL'] = 'sqlite://./db/screenshot.sqlite3'
-ENV['SESSION_SECRET'] = 'screenshot-session-secret'
+ENV['SESSION_SECRET'] = 'screenshot-session-secret-must-be-at-least-64-characters-long-padding'
 ENV['RACK_ENV'] = 'development'
 
 require 'sequel'
@@ -82,10 +82,10 @@ require 'rack'
 require 'mail'
 
 app = Rack::Builder.new do
-  map '/'        { run Admin }
-  map '/login'   { run Auth }
-  map '/clients' { run Clients }
-  map '/invoices' { run Invoices }
+  map('/') { run Admin }
+  map('/login') { run Auth }
+  map('/clients') { run Clients }
+  map('/invoices') { run Invoices }
 end.to_app
 
 # Start Puma in a background thread
@@ -127,17 +127,21 @@ browser = Ferrum::Browser.new(
 )
 
 begin
-  # Log in first
+  # Log in via JavaScript (brackets in name attr confuse CSS selector engines)
   browser.goto("http://127.0.0.1:#{PORT}/login")
-  browser.at_css('input[name="login[login]"]').focus.type('demo@simplysuite.com')
-  browser.at_css('input[name="login[password]"]').focus.type('demo1234')
-  browser.at_css('button[type="submit"]').click
-  browser.network.wait_for_idle
+  sleep 1
+  puts "Page title: #{browser.evaluate('document.title')}"
+  puts "Body snippet: #{browser.evaluate('document.body.innerHTML.substring(0, 300)')}"
+  browser.execute(<<~JS)
+    document.querySelector('input[type="text"]').value = 'demo@simplysuite.com';
+    document.querySelector('input[type="password"]').value = 'demo1234';
+    document.querySelector('button[type="submit"]').click();
+  JS
+  sleep 1
 
   # Navigate to invoice view
   browser.goto("http://127.0.0.1:#{PORT}/invoices/view/#{invoice.id}")
-  browser.network.wait_for_idle
-  sleep 1  # let Tailwind render
+  sleep 1.5
 
   # Take screenshot
   FileUtils.mkdir_p('docs')

@@ -1,6 +1,6 @@
 ENV['RACK_ENV'] = 'test'
 ENV['DATABASE_URL'] = 'sqlite://./db/test.sqlite3'
-ENV['SESSION_SECRET'] = 'test-secret-for-specs'
+ENV['SESSION_SECRET'] = 'test-secret-for-specs-must-be-at-least-64-chars-long-padding-here'
 
 require 'dotenv'
 # Don't load .env in test — use ENV vars above

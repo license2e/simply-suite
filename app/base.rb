@@ -3,6 +3,14 @@ require 'sinatra/content_for'
 require 'sinatra/flash'
 require 'session_auth'
 
+STATUS_COLORS = {
+  'paid'     => 'bg-green-100 text-green-800',
+  'late'     => 'bg-red-100 text-red-800',
+  'sent'     => 'bg-blue-100 text-blue-800',
+  'approved' => 'bg-yellow-100 text-yellow-800',
+  'draft'    => 'bg-gray-100 text-gray-700'
+}.freeze
+
 class SimplyBase < Sinatra::Base
   helpers SessionAuth::Helpers
   helpers Sinatra::ContentFor
