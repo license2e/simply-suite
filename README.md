@@ -49,11 +49,11 @@ greyed out in the UI).
 
     bundle exec ruby db/migrate.rb
 
-### 6. Create an admin user
+### 5. Create an admin user
 
     bundle exec ruby db/seeds.rb
 
-### 7. Build Tailwind CSS
+### 6. Build Tailwind CSS
 
     ./tailwindcss -i public/css/input.css -o public/css/tailwind.css
 
@@ -82,11 +82,26 @@ App runs at http://localhost:9393
 | `/invoices/send/:id` | Email invoice (requires SMTP config) |
 | `/invoices/paid/:id` | Mark as paid |
 
-## Batch invoice sending (cron)
+## Scripts
 
-    ruby scripts/send_approve_invoices.rb
+### Batch invoice sending
 
-Sends all approved, unsent, past-due invoices.
+Sends all approved, unsent, past-due invoices. Intended to be run as a cron job.
+
+    bundle exec ruby scripts/send_approve_invoices.rb
+
+### Generate sample invoice PDF
+
+Generates `docs/sample-invoice.pdf` using the app's PDF renderer with demo data.
+
+    bundle exec ruby scripts/generate_invoice_pdf.rb
+
+### Generate invoice screenshot
+
+Generates `docs/invoice-screenshot.png` — a full-page screenshot of the invoice view.
+Requires Chrome or Chromium to be installed.
+
+    bundle exec ruby scripts/generate_invoice_screenshot.rb
 
 ## Database
 
