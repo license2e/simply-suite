@@ -18,3 +18,12 @@ gem 'mail'
 
 gem 'prawn', '~> 2.5'
 gem 'prawn-table'
+
+group :test do
+  gem 'rspec'
+  gem 'rack-test'
+end
+
+group :development, :test do
+  gem 'ferrum'
+end
