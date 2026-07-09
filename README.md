@@ -5,6 +5,8 @@ invoices, generate PDFs, and email invoices to clients.
 
 ![Invoice view](docs/invoice-screenshot.png)
 
+[Sample invoice PDF](docs/sample-invoice.pdf)
+
 ## Stack
 
 Ruby 3.3 · Sinatra 4 · Sequel ORM · SQLite (default) or MySQL · Puma ·
