@@ -2,6 +2,7 @@ root = File.dirname(File.dirname(__FILE__))
 $:.unshift File.join(root, 'lib')
 $:.unshift File.join(root, 'config')
 
+require 'erb'
 require 'dotenv'
 Dotenv.load(File.join(root, '.env'))
 
