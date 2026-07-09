@@ -4,6 +4,7 @@ ruby '3.3'
 gem 'puma'
 gem 'sinatra', '~> 4.0'
 gem 'sinatra-contrib'
+gem 'erubi'
 gem 'sinatra-flash'
 gem 'rack-protection'
 

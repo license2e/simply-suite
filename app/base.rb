@@ -16,6 +16,7 @@ class SimplyBase < Sinatra::Base
   set :logging,       true
   set :sessions,      true
   set :session_secret, ENV.fetch('SESSION_SECRET', SecureRandom.hex(64))
+  set :erb, escape_html: true
   set :layout_default, :'admin/layout-default'
 
   use Rack::Static, urls: ['/css', '/js', '/pdfs', '/favicon.ico', '/favicon.gif'], root: 'public'

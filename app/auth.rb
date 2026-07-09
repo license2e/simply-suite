@@ -29,8 +29,9 @@ class Auth < SimplyBase
       @page_title = 'Login'
       v :'auth/login'
     elsif authenticate(params[:login][:login], params[:login][:password])
-      redirect params[:r] unless params[:r].nil? || params[:r].empty?
-      redirect '/'
+      return_to = session.delete(:return_to)
+      return_to ||= (params[:r] if params[:r]&.start_with?('/'))
+      redirect return_to || '/'
     else
       flash.now[:error] = "Username or password was incorrect"
       @action_url = url("/?r=#{params[:r]}")

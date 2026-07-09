@@ -127,7 +127,7 @@ class Invoices < SimplyBase
       return unless invoice_data[:services]
       invoice_data[:services].each do |_key, s|
         if s[:service_id] && !s[:service_id].empty?
-          serv = Service[s[:service_id].to_i]
+          serv = Service.first(id: s[:service_id].to_i, invoice_id: invoice.id)
           serv.update(
             item:         s[:item].empty? ? nil : s[:item],
             desc:         s[:desc].empty? ? nil : s[:desc],
@@ -150,7 +150,8 @@ class Invoices < SimplyBase
 
       if invoice_data[:delete_services]
         invoice_data[:delete_services].each do |id|
-          Service[id.to_i]&.destroy
+          serv = Service.first(id: id.to_i, invoice_id: invoice.id)
+          serv&.destroy
         end
       end
     end
