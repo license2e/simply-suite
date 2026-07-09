@@ -33,7 +33,7 @@ rescue ArgumentError
   data[:invoice][:date].to_s
 end
 
-logo_path = File.expand_path(data[:logo].to_s)
+logo_path = File.expand_path(data[:logo].to_s, File.dirname(File.expand_path(json_path)))
 
 out_path = File.join(
   File.dirname(File.expand_path(json_path)),

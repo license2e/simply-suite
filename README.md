@@ -37,7 +37,7 @@ No database, no server, no configuration needed — just Ruby and the gem depend
 
 Open `my-invoice.json` and fill in your details:
 
-- `logo` — path to your logo image (relative to where you run the script, or absolute). Leave blank to omit.
+- `logo` — path to your logo image, relative to the JSON file (or absolute). Leave blank to omit.
 - `from` — your company name and address.
 - `bill_to` — client name, contact, and address.
 - `invoice` — invoice number, date (`YYYY-MM-DD`), payment terms, and notes.
@@ -150,8 +150,8 @@ The PDF is saved alongside the JSON file with the same basename.
     bundle exec ruby scripts/invoice_from_json.rb my-invoice.json
     # → my-invoice.pdf
 
-The `logo` field in the JSON is a path to an image file (relative to where you run
-the script, or absolute). Leave it as an empty string to omit the logo.
+The `logo` field in the JSON is a path to an image file, relative to the JSON file
+itself (or absolute). Leave it as an empty string to omit the logo.
 
 ### Generate sample invoice PDF
 
