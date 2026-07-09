@@ -5,7 +5,7 @@ invoices, generate PDFs, and email invoices to clients.
 
 ![Invoice view](docs/invoice-screenshot.png)
 
-[Sample invoice PDF](docs/sample-invoice.pdf)
+[Sample invoice PDF](docs/invoice-template.pdf)
 
 ## Generate a PDF invoice (standalone)
 
