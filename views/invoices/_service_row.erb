@@ -1,0 +1,20 @@
+<div class="grid grid-cols-12 gap-2 items-center py-2 border-b border-gray-100" data-service-row>
+  <input type="hidden" name="invoice[services][SERVICE_INDEX][service_id]" value="">
+  <input type="text"   name="invoice[services][SERVICE_INDEX][item]"
+    placeholder="Item"
+    class="col-span-2 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-slate-500">
+  <input type="text"   name="invoice[services][SERVICE_INDEX][desc]"
+    placeholder="Description"
+    class="col-span-4 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-slate-500">
+  <input type="text"   name="invoice[services][SERVICE_INDEX][service_date]"
+    placeholder="MM/DD/YYYY"
+    class="col-span-2 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-slate-500">
+  <input type="number" name="invoice[services][SERVICE_INDEX][qty]"
+    placeholder="Qty"
+    class="col-span-1 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-slate-500">
+  <input type="text"   name="invoice[services][SERVICE_INDEX][cost]"
+    placeholder="0.00"
+    class="col-span-2 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-slate-500">
+  <button type="button" data-action="invoice-form#removeService"
+    class="col-span-1 text-gray-400 hover:text-red-500 text-xs text-right transition-colors">&times; Remove</button>
+</div>
