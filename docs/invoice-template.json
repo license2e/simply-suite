@@ -2,12 +2,15 @@
   "logo": "public/css/images/logo.png",
   "from": {
     "company": "Your Company, LLC",
+    "contact": "Your Name",
+    "email": "billing@yourcompany.com",
     "address": "123 Main St, Suite 100",
     "city_state_zip": "Charlotte, NC 28203"
   },
   "bill_to": {
     "name": "Acme Corporation",
     "contact": "Jane Smith",
+    "email": "jane@acmecorp.com",
     "street": "456 Client Ave",
     "street2": "",
     "city": "Charlotte",

@@ -38,8 +38,8 @@ No database, no server, no configuration needed — just Ruby and the gem depend
 Open `my-invoice.json` and fill in your details:
 
 - `logo` — path to your logo image, relative to the JSON file (or absolute). Leave blank to omit.
-- `from` — your company name and address.
-- `bill_to` — client name, contact, and address.
+- `from` — your company name, contact, email, and address.
+- `bill_to` — client name, contact, email, and address.
 - `invoice` — invoice number, date (`YYYY-MM-DD`), payment terms, and notes.
 - `services` — line items, each with `item`, `description`, `qty`, and `unit_cost`.
 - `discount_percentage` — set to `0` for no discount.

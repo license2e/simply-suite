@@ -54,6 +54,14 @@ Prawn::Document.generate(out_path) do |pdf|
   from = data[:from]
   pdf.text_box from[:company].to_s,        at: [address_x, pdf.cursor]
   pdf.move_down lineheight_y
+  unless from[:contact].to_s.empty?
+    pdf.text_box from[:contact].to_s,      at: [address_x, pdf.cursor]
+    pdf.move_down lineheight_y
+  end
+  unless from[:email].to_s.empty?
+    pdf.text_box from[:email].to_s,        at: [address_x, pdf.cursor]
+    pdf.move_down lineheight_y
+  end
   pdf.text_box from[:address].to_s,        at: [address_x, pdf.cursor]
   pdf.move_down lineheight_y
   pdf.text_box from[:city_state_zip].to_s, at: [address_x, pdf.cursor]
@@ -72,6 +80,10 @@ Prawn::Document.generate(out_path) do |pdf|
   pdf.move_down lineheight_y
   pdf.text_box bill_to[:contact].to_s, at: [address_x, pdf.cursor]
   pdf.move_down lineheight_y
+  unless bill_to[:email].to_s.empty?
+    pdf.text_box bill_to[:email].to_s, at: [address_x, pdf.cursor]
+    pdf.move_down lineheight_y
+  end
   street = [bill_to[:street], bill_to[:street2]].map(&:to_s).reject(&:empty?).join(' ')
   pdf.text_box street,                 at: [address_x, pdf.cursor]
   pdf.move_down lineheight_y

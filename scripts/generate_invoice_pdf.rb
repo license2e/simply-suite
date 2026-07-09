@@ -19,6 +19,7 @@ DB[:services].delete
 DB[:invoices].delete
 DB[:clients].delete
 DB[:users].delete
+DB[:companies].delete
 
 $:.unshift File.expand_path('../lib', __dir__)
 $:.unshift File.expand_path('../app', __dir__)
@@ -26,6 +27,12 @@ $:.unshift File.expand_path('../app', __dir__)
 require 'bcrypt'
 require_relative '../models/user'
 require_relative '../models/models'
+
+company = Company.create(
+  name: 'Simply Suite LLC', contact: 'Demo Admin', email: 'hello@simplysuite.com',
+  street: '1800 Camden Rd, Suite 107', city: 'Charlotte', state: 'NC', zip: '28203',
+  created_at: Time.now, updated_at: Time.now
+)
 
 client = Client.new
 client.title         = 'Acme Corporation'
@@ -67,7 +74,7 @@ require_relative '../app/clients'
 require_relative '../app/invoices'
 
 public_path = File.expand_path('../public', __dir__)
-pdf_web_path = Invoices.new!.send(:create_invoice_pdf, public_path, invoice, '/css/images/logo.png')
+pdf_web_path = Invoices.new!.send(:create_invoice_pdf, public_path, invoice, '/css/images/logo.png', company)
 
 src  = File.join(public_path, pdf_web_path)
 dest = File.expand_path('../docs/sample-invoice.pdf', __dir__)

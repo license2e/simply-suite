@@ -52,7 +52,7 @@ class Invoices < SimplyBase
     end
     process_invoice_services(params[:invoice], @invoice)
     if validate_invoice(@invoice)
-      create_invoice_pdf(settings.public_folder, @invoice, '/css/images/logo.png')
+      create_invoice_pdf(settings.public_folder, @invoice, '/css/images/logo.png', Company.first)
       flash[:success] = "Invoice created successfully"
       redirect url("/#{@invoice.client.client_key}")
     end
@@ -71,7 +71,7 @@ class Invoices < SimplyBase
     end
     process_invoice_services(params[:invoice], @invoice)
     if validate_invoice(@invoice)
-      create_invoice_pdf(settings.public_folder, @invoice, '/css/images/logo.png')
+      create_invoice_pdf(settings.public_folder, @invoice, '/css/images/logo.png', Company.first)
       flash[:success] = "Invoice updated successfully"
       redirect url("/#{@invoice.client.client_key}")
     end
@@ -187,7 +187,7 @@ class Invoices < SimplyBase
       }
     end
 
-    def create_invoice_pdf(public_path, invoice, logopath)
+    def create_invoice_pdf(public_path, invoice, logopath, company = nil)
       paths = get_invoice_pdf_path(public_path, invoice)
       local_file = paths[:local]
 
@@ -203,12 +203,22 @@ class Invoices < SimplyBase
         pdf.font "Helvetica"
         pdf.font_size font_size
 
-        pdf.text_box "EON Media Group, LLC",             at: [address_x, pdf.cursor]
-        pdf.move_down lineheight_y
-        pdf.text_box "1800 Camden Rd. Suite 107/123",    at: [address_x, pdf.cursor]
-        pdf.move_down lineheight_y
-        pdf.text_box "Charlotte, NC 28203",              at: [address_x, pdf.cursor]
-        pdf.move_down lineheight_y
+        if company
+          pdf.text_box company.name.to_s,    at: [address_x, pdf.cursor]
+          pdf.move_down lineheight_y
+          unless company.contact.to_s.empty?
+            pdf.text_box company.contact.to_s, at: [address_x, pdf.cursor]
+            pdf.move_down lineheight_y
+          end
+          unless company.email.to_s.empty?
+            pdf.text_box company.email.to_s,   at: [address_x, pdf.cursor]
+            pdf.move_down lineheight_y
+          end
+          pdf.text_box company.street.to_s,  at: [address_x, pdf.cursor]
+          pdf.move_down lineheight_y
+          pdf.text_box company.city_state_zip, at: [address_x, pdf.cursor]
+          pdf.move_down lineheight_y
+        end
 
         last_y = pdf.cursor
         pdf.move_cursor_to pdf.bounds.height
@@ -218,11 +228,13 @@ class Invoices < SimplyBase
         pdf.move_down 85
         last_y = pdf.cursor
 
-        pdf.text_box "#{invoice.client.name}",                                        at: [address_x, pdf.cursor]
+        pdf.text_box invoice.client.name.to_s,    at: [address_x, pdf.cursor]
         pdf.move_down lineheight_y
-        pdf.text_box "#{invoice.client.contact}",                                     at: [address_x, pdf.cursor]
+        pdf.text_box invoice.client.contact.to_s, at: [address_x, pdf.cursor]
         pdf.move_down lineheight_y
-        pdf.text_box "#{invoice.client.street} #{invoice.client.street2}",            at: [address_x, pdf.cursor]
+        pdf.text_box invoice.client.email.to_s,   at: [address_x, pdf.cursor]
+        pdf.move_down lineheight_y
+        pdf.text_box "#{invoice.client.street} #{invoice.client.street2}".strip, at: [address_x, pdf.cursor]
         pdf.move_down lineheight_y
         pdf.text_box "#{invoice.client.city}, #{invoice.client.state} #{invoice.client.zip}", at: [address_x, pdf.cursor]
 

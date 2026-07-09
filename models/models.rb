@@ -126,6 +126,15 @@ class Service < Sequel::Model
   end
 end
 
+class Company < Sequel::Model
+  plugin :timestamps, update_on_create: true
+  plugin :validation_helpers
+
+  def city_state_zip
+    "#{city}, #{state} #{zip}"
+  end
+end
+
 class Division < Sequel::Model
   plugin :timestamps, update_on_create: true
   plugin :validation_helpers

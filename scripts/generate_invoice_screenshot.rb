@@ -22,6 +22,7 @@ DB[:services].delete
 DB[:invoices].delete
 DB[:clients].delete
 DB[:users].delete
+DB[:companies].delete
 
 $:.unshift File.expand_path('../lib', __dir__)
 $:.unshift File.expand_path('../app', __dir__)
@@ -31,6 +32,12 @@ require_relative '../models/user'
 require_relative '../models/models'
 
 # Seed sample data
+Company.create(
+  name: 'Simply Suite LLC', contact: 'Demo Admin', email: 'hello@simplysuite.com',
+  street: '1800 Camden Rd, Suite 107', city: 'Charlotte', state: 'NC', zip: '28203',
+  created_at: Time.now, updated_at: Time.now
+)
+
 admin = User.create(
   login: 'demo@simplysuite.com',
   hashed_password: BCrypt::Password.create('demo1234').to_s,
