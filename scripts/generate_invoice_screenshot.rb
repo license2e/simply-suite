@@ -145,7 +145,7 @@ begin
 
   # Take screenshot
   FileUtils.mkdir_p('docs')
-  browser.screenshot(path: 'docs/invoice-screenshot.png', full: false)
+  browser.screenshot(path: 'docs/invoice-screenshot.png', full: true)
   puts "Screenshot saved to docs/invoice-screenshot.png"
 ensure
   browser.quit
