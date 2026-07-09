@@ -1,15 +1,19 @@
-source :rubygems
+source 'https://rubygems.org'
+ruby '3.3'
 
-gem 'thin', '1.3.1'
-gem 'multi_json', '~>1.0.3'
-gem 'rack', '1.4.1'
-gem 'tilt', '1.3.3'
-gem 'rack-protection', '1.2.0'
-gem 'rack-cache', '1.2'
-gem 'sinatra', '1.3.2'
-gem 'actionmailer', '3.2.3'
-gem 'haml', '3.1.4'
-gem 'datamapper', '1.2.0'
-gem 'ruby-mysql', '2.9.10'
-gem 'dm-mysql-adapter', '1.2.0'
-gem 'prawn', '1.0.0.rc1'
+gem 'puma'
+gem 'sinatra', '~> 4.0'
+gem 'sinatra-contrib'
+gem 'sinatra-flash'
+gem 'rack-protection'
+
+gem 'sequel'
+gem 'sqlite3', '~> 2.0'
+gem 'mysql2'
+
+gem 'dotenv'
+gem 'bcrypt'
+gem 'mail'
+
+gem 'prawn', '~> 2.5'
+gem 'prawn-table'
