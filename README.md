@@ -7,6 +7,52 @@ invoices, generate PDFs, and email invoices to clients.
 
 [Sample invoice PDF](docs/sample-invoice.pdf)
 
+## Generate a PDF invoice (standalone)
+
+No database, no server, no configuration needed — just Ruby and the gem dependencies.
+
+### 1. Prerequisites
+
+- Ruby 3.3 — install with [mise](https://mise.jdx.dev/) (recommended), rbenv, or rvm:
+
+      curl https://mise.run | sh
+      mise install ruby@3.3
+
+- Bundler:
+
+      gem install bundler
+
+### 2. Clone the repo
+
+    git clone <repo-url>
+    cd simply-suite
+
+### 3. Install gems
+
+    bundle install
+
+### 4. Copy and edit the invoice template
+
+    cp docs/invoice-template.json my-invoice.json
+
+Open `my-invoice.json` and fill in your details:
+
+- `logo` — path to your logo image (relative to where you run the script, or absolute). Leave blank to omit.
+- `from` — your company name and address.
+- `bill_to` — client name, contact, and address.
+- `invoice` — invoice number, date (`YYYY-MM-DD`), payment terms, and notes.
+- `services` — line items, each with `item`, `description`, `qty`, and `unit_cost`.
+- `discount_percentage` — set to `0` for no discount.
+- `amount_paid` — any deposit already received; set to `0` if nothing has been paid.
+
+### 5. Generate the PDF
+
+    bundle exec ruby scripts/invoice_from_json.rb my-invoice.json
+
+The PDF is saved alongside the JSON file — `my-invoice.pdf` in this example.
+
+---
+
 ## Stack
 
 Ruby 3.3 · Sinatra 4 · Sequel ORM · SQLite (default) or MySQL · Puma ·
