@@ -27,6 +27,10 @@ group :test do
   gem 'rack-test'
 end
 
+group :development do
+  gem 'foreman'
+end
+
 group :development, :test do
   gem 'ferrum'
 end
