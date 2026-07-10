@@ -18,9 +18,9 @@ class Client < Sequel::Model
 
   def title=(name)
     self.name = name
-    self.client_key = name.gsub(/\s/, "-").gsub(/[^\w-]/, '').split("-").map { |n| n[0].chr.downcase }.join
-    existing = self.class.first(client_key: self.client_key)
-    self.client_key = "#{self.client_key}#{rand(100)}" if existing
+    slug = name.to_s.downcase.gsub(/[^\w\s-]/, '').gsub(/[\s_]+/, '-').gsub(/-+/, '-').gsub(/\A-|-\z/, '')
+    existing = self.class.first(client_key: slug)
+    self.client_key = existing ? "#{slug}-#{rand(100)}" : slug
   end
 end
 

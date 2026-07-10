@@ -4,6 +4,8 @@ Dotenv.load
 require 'sequel'
 DB = Sequel.connect(ENV.fetch('DATABASE_URL'))
 Sequel.extension :migration
+Sequel.application_timezone = :utc
+Sequel.database_timezone = :utc
 
 require 'mail'
 if ENV['SMTP_HOST'] && !ENV['SMTP_HOST'].empty?

@@ -132,7 +132,7 @@ class Invoices < SimplyBase
           serv.update(
             item:         s[:item].empty? ? nil : s[:item],
             desc:         s[:desc].empty? ? nil : s[:desc],
-            service_date: s[:service_date].empty? ? nil : s[:service_date],
+            service_date: s[:service_date].empty? ? nil : DateTime.strptime(s[:service_date], "%m/%d/%Y"),
             qty:          s[:qty].empty? ? nil : s[:qty].to_i,
             cost:         s[:cost].empty? ? nil : s[:cost].to_f
           ) if serv
@@ -142,7 +142,7 @@ class Invoices < SimplyBase
             invoice_id:   invoice.id,
             item:         s[:item].empty? ? nil : s[:item],
             desc:         s[:desc].empty? ? nil : s[:desc],
-            service_date: s[:service_date].empty? ? nil : s[:service_date],
+            service_date: s[:service_date].empty? ? nil : DateTime.strptime(s[:service_date], "%m/%d/%Y"),
             qty:          s[:qty].empty? ? nil : s[:qty].to_i,
             cost:         s[:cost].empty? ? nil : s[:cost].to_f
           )
