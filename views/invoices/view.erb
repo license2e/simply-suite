@@ -30,6 +30,30 @@
     <% end %>
   </div>
 
+  <!-- From / Bill To -->
+  <div class="bg-white rounded-xl border border-gray-200 grid grid-cols-2 divide-x divide-gray-100">
+    <div class="px-5 py-4">
+      <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">From</p>
+      <% if @company %>
+        <p class="text-sm font-semibold text-gray-900"><%= @company.name %></p>
+        <% unless @company.contact.to_s.empty? %><p class="text-sm text-gray-600"><%= @company.contact %></p><% end %>
+        <% unless @company.street.to_s.empty? %><p class="text-sm text-gray-600"><%= @company.street %></p><% end %>
+        <% unless @company.city.to_s.empty? %><p class="text-sm text-gray-600"><%= @company.city_state_zip %></p><% end %>
+        <% unless @company.email.to_s.empty? %><p class="text-sm text-gray-600"><%= @company.email %></p><% end %>
+      <% else %>
+        <p class="text-sm text-gray-400 italic">No company configured</p>
+      <% end %>
+    </div>
+    <div class="px-5 py-4">
+      <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Bill To</p>
+      <p class="text-sm font-semibold text-gray-900"><%= @invoice.client.name %></p>
+      <% unless @invoice.client.contact.to_s.empty? %><p class="text-sm text-gray-600"><%= @invoice.client.contact %></p><% end %>
+      <p class="text-sm text-gray-600"><%= @invoice.client.street %><% unless @invoice.client.street2.to_s.empty? %> <%= @invoice.client.street2 %><% end %></p>
+      <p class="text-sm text-gray-600"><%= @invoice.client.city %>, <%= @invoice.client.state %> <%= @invoice.client.zip %></p>
+      <% unless @invoice.client.email.to_s.empty? %><p class="text-sm text-gray-600"><%= @invoice.client.email %></p><% end %>
+    </div>
+  </div>
+
   <!-- Summary card -->
   <div class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
     <div class="px-5 py-4 flex items-center justify-between">

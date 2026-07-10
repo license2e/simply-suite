@@ -82,6 +82,7 @@ class Invoices < SimplyBase
   get '/view/:id' do
     @invoice = Invoice[params[:id].to_i]
     halt 404 unless @invoice
+    @company = Company.first
     @logopath = '/css/images/logo.png'
     pdf_paths = get_invoice_pdf_path(settings.public_folder, @invoice)
     @pdf_invoice_path = pdf_paths[:web]
@@ -204,20 +205,20 @@ class Invoices < SimplyBase
         pdf.font_size font_size
 
         if company
-          pdf.text_box company.name.to_s,    at: [address_x, pdf.cursor]
+          pdf.text_box company.name.to_s,      at: [address_x, pdf.cursor]
           pdf.move_down lineheight_y
           unless company.contact.to_s.empty?
             pdf.text_box company.contact.to_s, at: [address_x, pdf.cursor]
             pdf.move_down lineheight_y
           end
+          pdf.text_box company.street.to_s,    at: [address_x, pdf.cursor]
+          pdf.move_down lineheight_y
+          pdf.text_box company.city_state_zip,  at: [address_x, pdf.cursor]
+          pdf.move_down lineheight_y
           unless company.email.to_s.empty?
             pdf.text_box company.email.to_s,   at: [address_x, pdf.cursor]
             pdf.move_down lineheight_y
           end
-          pdf.text_box company.street.to_s,  at: [address_x, pdf.cursor]
-          pdf.move_down lineheight_y
-          pdf.text_box company.city_state_zip, at: [address_x, pdf.cursor]
-          pdf.move_down lineheight_y
         end
 
         last_y = pdf.cursor
@@ -232,11 +233,11 @@ class Invoices < SimplyBase
         pdf.move_down lineheight_y
         pdf.text_box invoice.client.contact.to_s, at: [address_x, pdf.cursor]
         pdf.move_down lineheight_y
-        pdf.text_box invoice.client.email.to_s,   at: [address_x, pdf.cursor]
-        pdf.move_down lineheight_y
         pdf.text_box "#{invoice.client.street} #{invoice.client.street2}".strip, at: [address_x, pdf.cursor]
         pdf.move_down lineheight_y
         pdf.text_box "#{invoice.client.city}, #{invoice.client.state} #{invoice.client.zip}", at: [address_x, pdf.cursor]
+        pdf.move_down lineheight_y
+        pdf.text_box invoice.client.email.to_s,   at: [address_x, pdf.cursor]
 
         pdf.move_cursor_to last_y
 
