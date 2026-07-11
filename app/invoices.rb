@@ -235,133 +235,159 @@ class Invoices < SimplyBase
 
       Prawn::Document.generate(local_file) do |pdf|
         logopath_local = File.join(public_path, logopath)
-        address_x          = 35
-        invoice_header_x   = 325
-        lineheight_y       = 12
-        font_size          = 9
-        font_width_assumed = 5
+        w      = pdf.bounds.width
+        base   = 9
+        small  = 7
+        lh     = 13
+        gray   = '666666'
+        lgray  = 'aaaaaa'
+        half   = w * 0.50
 
-        pdf.move_down 25
         pdf.font "Helvetica"
-        pdf.font_size font_size
+        pdf.font_size base
 
+        # ── HEADER ────────────────────────────────────────────────────────────
+        header_top = pdf.cursor
+        left_y     = header_top
+
+        # Left: company info (text_box — no cursor movement)
         if company
-          pdf.text_box company.name.to_s,      at: [address_x, pdf.cursor]
-          pdf.move_down lineheight_y
-          unless company.contact.to_s.empty?
-            pdf.text_box company.contact.to_s, at: [address_x, pdf.cursor]
-            pdf.move_down lineheight_y
+          pdf.font("Helvetica", style: :bold) do
+            pdf.text_box company.name.to_s, at: [0, left_y], width: half, size: 11
           end
-          pdf.text_box company.street.to_s,    at: [address_x, pdf.cursor]
-          pdf.move_down lineheight_y
-          pdf.text_box company.city_state_zip,  at: [address_x, pdf.cursor]
-          pdf.move_down lineheight_y
-          unless company.email.to_s.empty?
-            pdf.text_box company.email.to_s,   at: [address_x, pdf.cursor]
-            pdf.move_down lineheight_y
+          left_y -= 16
+          pdf.fill_color gray
+          [company.contact, company.street, company.city_state_zip, company.email].each do |line|
+            next if line.to_s.strip.empty?
+            pdf.text_box line.to_s, at: [0, left_y], width: half, size: base
+            left_y -= lh
           end
+          pdf.fill_color '000000'
         end
 
-        last_y = pdf.cursor
-        pdf.move_cursor_to pdf.bounds.height
-        pdf.image logopath_local, width: 125, position: :right if File.exist?(logopath_local)
-        pdf.move_cursor_to last_y
+        # Right: logo → "INVOICE" → # → date → balance box (cursor flow)
+        pdf.move_cursor_to header_top
+        if File.exist?(logopath_local)
+          pdf.image logopath_local, fit: [200, 55], position: :right
+          pdf.move_down 6
+        end
+        pdf.font("Helvetica", style: :bold) { pdf.text "INVOICE", size: 22, align: :right }
+        pdf.font("Helvetica", style: :bold) do
+          pdf.text "#{invoice.client.client_prefix}-#{invoice.num}", size: base, align: :right
+        end
+        pdf.fill_color gray
+        pdf.text invoice.formatted_invoice_date, size: base, align: :right
+        pdf.fill_color '000000'
+        pdf.move_down 8
 
-        pdf.move_down 85
-        last_y = pdf.cursor
-
-        pdf.text_box invoice.client.name.to_s,    at: [address_x, pdf.cursor]
-        pdf.move_down lineheight_y
-        pdf.text_box invoice.client.contact.to_s, at: [address_x, pdf.cursor]
-        pdf.move_down lineheight_y
-        pdf.text_box "#{invoice.client.street} #{invoice.client.street2}".strip, at: [address_x, pdf.cursor]
-        pdf.move_down lineheight_y
-        pdf.text_box "#{invoice.client.city}, #{invoice.client.state} #{invoice.client.zip}", at: [address_x, pdf.cursor]
-        pdf.move_down lineheight_y
-        pdf.text_box invoice.client.email.to_s,   at: [address_x, pdf.cursor]
-
-        pdf.move_cursor_to last_y
-
-        header_data = [
-          ["Invoice #",    "#{invoice.client.client_prefix}-#{invoice.num}"],
-          ["Invoice Date", invoice.formatted_invoice_date],
-          ["Balance",      "$#{invoice.formatted_final_amount} USD"]
-        ]
-        pdf.table(header_data, position: invoice_header_x, width: 215) do
-          style(row(0..1).columns(0..1), padding: [2, 5, 2, 5], borders: [])
-          style(row(2), background_color: 'e9e9e9', border_color: 'dddddd', font_style: :bold)
-          style(column(1), align: :right)
-          style(row(2).columns(0), borders: [:top, :left, :bottom])
-          style(row(2).columns(1), borders: [:top, :right, :bottom])
+        balance_w = 175
+        pdf.table([["Balance Due", "$#{invoice.formatted_final_amount} USD"]], position: w - balance_w, width: balance_w) do
+          style(row(0).columns(0..1), background_color: 'f5f5f5', border_color: 'e0e0e0',
+                borders: [:top, :right, :bottom, :left], padding: [7, 8, 7, 8])
+          style(column(0), font_style: :bold, size: small, text_color: lgray)
+          style(column(1), font_style: :bold, size: 12, align: :right)
         end
 
-        pdf.move_down 45
+        # Advance past both columns
+        pdf.move_cursor_to [left_y, pdf.cursor].min - 16
 
+        # ── BILL TO ───────────────────────────────────────────────────────────
+        bill_top = pdf.cursor
+        pdf.fill_color lgray
+        pdf.font("Helvetica", style: :bold) { pdf.text_box "BILL TO", at: [0, bill_top], size: small }
+        pdf.fill_color '000000'
+        bill_top -= 12
+
+        pdf.font("Helvetica", style: :bold) do
+          pdf.text_box invoice.client.name.to_s, at: [0, bill_top], size: base
+        end
+        bill_top -= lh
+
+        pdf.fill_color gray
+        [
+          invoice.client.contact,
+          "#{invoice.client.street} #{invoice.client.street2}".strip,
+          "#{invoice.client.city}, #{invoice.client.state} #{invoice.client.zip}",
+          invoice.client.email
+        ].each do |line|
+          next if line.to_s.gsub(/[\s,]/, '').empty?
+          pdf.text_box line.to_s, at: [0, bill_top], width: half, size: base
+          bill_top -= lh
+        end
+        pdf.fill_color '000000'
+
+        pdf.move_cursor_to bill_top - 18
+
+        # ── SERVICES ──────────────────────────────────────────────────────────
         service_data = [["Item", "Description", "Date", "Unit Cost", "Qty", "Line Total"]]
         invoice.services.each do |s|
-          service_data << [s.item.to_s, s.desc.to_s, s.formatted_service_date, "$#{s.formatted_cost}", s.qty.to_s, "$#{s.formatted_line_total}"]
+          service_data << [s.item.to_s, s.desc.to_s, s.formatted_service_date,
+                           "$#{s.formatted_cost}", s.qty.to_s, "$#{s.formatted_line_total}"]
         end
-        service_data << [" ", " ", " ", " ", " ", " "]
 
-        pdf.table(service_data, width: pdf.bounds.width) do
-          style(row(1..-1).columns(0..-1), padding: [4, 5, 4, 5], borders: [:bottom], border_color: 'dddddd')
-          style(row(0), background_color: 'e9e9e9', border_color: 'dddddd', font_style: :bold)
-          style(row(0).columns(0..-1), borders: [:top, :bottom])
-          style(row(0).columns(0),  borders: [:top, :left, :bottom])
-          style(row(0).columns(-1), borders: [:top, :right, :bottom])
-          style(row(-1), border_width: 2)
+        pdf.table(service_data, width: w) do
+          style(row(0..-1).columns(0..-1), padding: [5, 6, 5, 6], border_width: 0)
+          style(row(0), background_color: 'f9f9f9', font_style: :bold, size: small, text_color: lgray)
+          style(row(1..-1).columns(0..-1), borders: [:bottom], border_color: 'f2f2f2')
           style(column(2..-1), align: :right)
-          style(columns(0), width: 65)
-          style(columns(1), width: 200)
-          style(columns(2), width: 65)
+          style(column(0), width: 65)
+          style(column(1), width: 200)
+          style(column(2), width: 65)
         end
 
-        pdf.move_down 1
+        pdf.move_down 16
 
-        totals = []
+        # ── TOTALS ────────────────────────────────────────────────────────────
+        totals_w = 220
+        totals_x = w - totals_w
+
         if invoice.total_discount.to_f > 0
-          totals << ["Sub Total",      "$#{invoice.formatted_total_amount}"]
-          totals << ["Discount -#{invoice.formatted_discount_percentage}%", "$#{invoice.formatted_total_discount}"]
-          totals << ["Invoice Total",  "$#{invoice.formatted_discount_total_amount}"]
+          pdf.table([["Subtotal", "$#{invoice.formatted_total_amount}"],
+                     ["Discount (#{invoice.formatted_discount_percentage}%)", "-$#{invoice.formatted_total_discount}"]], position: totals_x, width: totals_w) do
+            style(row(0..-1).columns(0..-1), padding: [3, 6, 3, 6], borders: [], text_color: gray)
+            style(column(1), align: :right)
+          end
+          pdf.table([["Invoice Total", "$#{invoice.formatted_discount_total_amount}"]], position: totals_x, width: totals_w) do
+            style(row(0).columns(0..1), padding: [4, 6, 4, 6], borders: [:top], border_color: 'e8e8e8', font_style: :bold, text_color: '111111')
+            style(column(1), align: :right)
+          end
         else
-          totals << ["Invoice Total",  "$#{invoice.formatted_total_amount}"]
-        end
-        totals << ["Amount Paid", "-$#{invoice.formatted_amount_paid}"]
-        totals << ["Balance",     "$#{invoice.formatted_final_amount} USD"]
-
-        pdf.table(totals, position: invoice_header_x, width: 215) do
-          style(row(0), font_style: :bold)
-          style(column(1), align: :right)
-          if invoice.total_discount.to_f > 0
-            style(row(0..3).columns(0..3), padding: [2, 5, 2, 5], borders: [])
-            style(row(2), font_style: :bold, border_color: 'dddddd', borders: [:top])
-            style(row(4), background_color: 'e9e9e9', border_color: 'dddddd', font_style: :bold)
-            style(row(4).columns(0), borders: [:top, :left, :bottom])
-            style(row(4).columns(1), borders: [:top, :right, :bottom])
-          else
-            style(row(0..1).columns(0..1), padding: [2, 5, 2, 5], borders: [])
-            style(row(2), background_color: 'e9e9e9', border_color: 'dddddd', font_style: :bold)
-            style(row(2).columns(0), borders: [:top, :left, :bottom])
-            style(row(2).columns(1), borders: [:top, :right, :bottom])
+          pdf.table([["Invoice Total", "$#{invoice.formatted_total_amount}"]], position: totals_x, width: totals_w) do
+            style(row(0).columns(0..1), padding: [3, 6, 3, 6], borders: [], font_style: :bold, text_color: '111111')
+            style(column(1), align: :right)
           end
         end
 
-        pdf.move_down 25
-
-        pdf.table([["Terms"], [invoice.formatted_terms]], width: 275) do
-          style(row(0..-1).columns(0..-1), padding: [1, 0, 1, 0], borders: [])
-          style(row(0).columns(0), font_style: :bold)
+        if invoice.amount_paid.to_f > 0
+          pdf.table([["Amount Paid", "-$#{invoice.formatted_amount_paid}"]], position: totals_x, width: totals_w) do
+            style(row(0).columns(0..1), padding: [3, 6, 3, 6], borders: [], text_color: gray)
+            style(column(1), align: :right)
+          end
         end
 
-        pdf.move_down 15
-
-        pdf.table([["Notes"], [invoice.formatted_notes]], width: 275) do
-          style(row(0..-1).columns(0..-1), padding: [1, 0, 1, 0], borders: [])
-          style(row(0).columns(0), font_style: :bold)
+        pdf.table([["Balance Due", "$#{invoice.formatted_final_amount} USD"]], position: totals_x, width: totals_w) do
+          style(row(0).columns(0..1), background_color: 'f5f5f5', border_color: 'e5e5e5',
+                borders: [:top, :right, :bottom, :left], padding: [7, 8, 7, 8])
+          style(column(0), font_style: :bold)
+          style(column(1), font_style: :bold, size: 12, align: :right)
         end
 
-        page_num = "page 1 of 1"
-        pdf.text_box page_num, at: [(pdf.bounds.width - (page_num.length * font_width_assumed)), 10]
+        pdf.move_down 24
+
+        # ── FOOTER: Terms | Notes side by side ────────────────────────────────
+        col_w    = (w - 20) / 2.0
+        footer_y = pdf.cursor
+
+        pdf.fill_color lgray
+        pdf.font("Helvetica", style: :bold) { pdf.text_box "Terms", at: [0, footer_y], size: small }
+        pdf.fill_color '444444'
+        pdf.text_box invoice.formatted_terms, at: [0, footer_y - 11], width: col_w, size: base
+
+        pdf.fill_color lgray
+        pdf.font("Helvetica", style: :bold) { pdf.text_box "Notes", at: [col_w + 20, footer_y], size: small }
+        pdf.fill_color '444444'
+        pdf.text_box invoice.formatted_notes, at: [col_w + 20, footer_y - 11], width: col_w, size: base
+        pdf.fill_color '000000'
       end
 
       paths[:web]
