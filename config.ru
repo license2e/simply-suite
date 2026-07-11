@@ -49,3 +49,8 @@ map '/invoices' do
   require 'invoices'
   run Invoices
 end
+
+map '/settings' do
+  require 'settings'
+  run Settings
+end
