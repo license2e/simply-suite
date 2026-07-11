@@ -4,96 +4,34 @@
 # Usage: bundle exec ruby scripts/generate_invoice_screenshot.rb
 
 require 'fileutils'
-require 'dotenv'
-Dotenv.load
+require 'tmpdir'
 
-# Use a dedicated screenshot database
-ENV['DATABASE_URL'] = 'sqlite://./db/screenshot.sqlite3'
+$LOAD_PATH.unshift File.expand_path('../lib', __dir__)
+require 'store'
+
 ENV['SESSION_SECRET'] = 'screenshot-session-secret-must-be-at-least-64-characters-long-padding'
 ENV['RACK_ENV'] = 'development'
 
-require 'sequel'
-DB = Sequel.connect(ENV['DATABASE_URL'])
-Sequel.extension :migration
-Sequel::Migrator.run(DB, File.expand_path('../db/migrations', __dir__))
+# Use a dedicated, disposable data root for the sample business/client/invoice
+Store.data_root = Dir.mktmpdir('screenshot')
 
-# Clean slate
-DB[:services].delete
-DB[:invoices].delete
-DB[:clients].delete
-DB[:users].delete
-DB[:companies].delete
-
-$:.unshift File.expand_path('../lib', __dir__)
-$:.unshift File.expand_path('../app', __dir__)
-
-require 'bcrypt'
-require_relative '../models/user'
-require_relative '../models/models'
-
-# Seed sample data
-Company.create(
-  name: 'Simply Suite LLC', contact: 'Demo Admin', email: 'hello@simplysuite.com',
-  street: '1800 Camden Rd, Suite 107', city: 'Charlotte', state: 'NC', zip: '28203',
-  created_at: Time.now, updated_at: Time.now
-)
-
-admin = User.create(
-  login: 'demo@simplysuite.com',
-  hashed_password: BCrypt::Password.create('demo1234').to_s,
-  first_name: 'Demo', last_name: 'Admin', is_admin: true,
-  created_at: Time.now, updated_at: Time.now
-)
-
-client = Client.new
-client.title = 'Acme Corporation'
-client.client_prefix = 'ACM'
-client.contact = 'Jane Smith'
-client.email = 'jane@acmecorp.com'
-client.street = '1800 Camden Rd, Suite 200'
-client.city = 'Charlotte'
-client.state = 'NC'
-client.zip = '28203'
-client.save
-
-invoice = Invoice.create(
-  client: client,
-  num: '007',
-  invoice_date: Time.now,
-  total_amount: 4750.00,
-  total_discount: 0.0,
-  amount_paid: 0.0,
-  terms: 'Net 30 days',
+biz = Store::Business.create(name: 'Simply Suite LLC', contact: 'Demo Admin', email: 'hello@simplysuite.com',
+                             street: '1800 Camden Rd, Suite 107', city: 'Charlotte', state: 'NC', zip: '28203')
+client = biz.create_client(name: 'Acme Corporation', prefix: 'ACM', contact: 'Jane Smith', email: 'jane@acmecorp.com',
+                           street: '1800 Camden Rd, Suite 200', street2: '', city: 'Charlotte', state: 'NC', zip: '28203')
+invoice = client.create_invoice(invoice_date: '2026-07-09', total_amount: 4750.0, terms: 'Net 30 days',
   notes: 'Thank you for choosing Simply Suite. We appreciate your business.',
-  is_complete: true,
-  approved_on: Time.now,
-  created_at: Time.now,
-  updated_at: Time.now
-)
+  services: [
+    { item: 'Strategy',    desc: 'Digital strategy & brand audit',   service_date: '2026-07-01', qty: 1,  cost: 1500.0 },
+    { item: 'Design',      desc: 'UI/UX design for 10 core screens', service_date: '2026-07-03', qty: 1,  cost: 2000.0 },
+    { item: 'Development', desc: 'Frontend development @ $125/hr',  service_date: '2026-07-05', qty: 10, cost: 125.0 }
+  ])
+Store::InvoicePdf.render(invoice, biz, invoice.pdf_path)
 
-Service.create(invoice: invoice, item: 'Strategy',    desc: 'Digital strategy & brand audit',         qty: 1,  cost: 1500.00, created_at: Time.now, updated_at: Time.now)
-Service.create(invoice: invoice, item: 'Design',      desc: 'UI/UX design for 10 core screens',       qty: 1,  cost: 2000.00, created_at: Time.now, updated_at: Time.now)
-Service.create(invoice: invoice, item: 'Development', desc: 'Frontend development @ $125/hr',         qty: 10, cost: 125.00,  created_at: Time.now, updated_at: Time.now)
-
-# Build the Rack app
-require 'sinatra/base'
-require 'session_auth'
-require 'mailer'
-require 'base'
-require_relative '../app/admin'
-require_relative '../app/auth'
-require_relative '../app/clients'
-require_relative '../app/invoices'
-
+# Build the Rack app from the real config.ru (same app the server runs in production)
 require 'rack'
-require 'mail'
-
-app = Rack::Builder.new do
-  map('/') { run Admin }
-  map('/login') { run Auth }
-  map('/clients') { run Clients }
-  map('/invoices') { run Invoices }
-end.to_app
+built = Rack::Builder.parse_file(File.expand_path('../config.ru', __dir__))
+app = built.is_a?(Array) ? built.first : built # Rack 2 returns [app, opts]; Rack 3 returns app
 
 # Start Puma in a background thread
 PORT = 9394
@@ -115,7 +53,7 @@ require 'net/http'
 print 'Waiting for server'
 30.times do
   begin
-    Net::HTTP.get(URI("http://127.0.0.1:#{PORT}/login"))
+    Net::HTTP.get(URI("http://127.0.0.1:#{PORT}/businesses"))
     break
   rescue
     print '.'
@@ -134,20 +72,14 @@ browser = Ferrum::Browser.new(
 )
 
 begin
-  # Log in via JavaScript (brackets in name attr confuse CSS selector engines)
-  browser.goto("http://127.0.0.1:#{PORT}/login")
+  # Select the business (sets session[:business] via a real form POST)
+  browser.goto("http://127.0.0.1:#{PORT}/businesses")
   sleep 1
-  puts "Page title: #{browser.evaluate('document.title')}"
-  puts "Body snippet: #{browser.evaluate('document.body.innerHTML.substring(0, 300)')}"
-  browser.execute(<<~JS)
-    document.querySelector('input[type="text"]').value = 'demo@simplysuite.com';
-    document.querySelector('input[type="password"]').value = 'demo1234';
-    document.querySelector('button[type="submit"]').click();
-  JS
+  browser.at_css('form button[type="submit"]').click
   sleep 1
 
   # Navigate to invoice view
-  browser.goto("http://127.0.0.1:#{PORT}/invoices/view/#{invoice.id}")
+  browser.goto("http://127.0.0.1:#{PORT}/invoices/#{client.slug}/#{invoice.num}")
   sleep 1.5
 
   # Remove fixed-height/overflow constraints so full page height is captured
@@ -168,6 +100,3 @@ ensure
   browser.quit
   server_thread.kill
 end
-
-# Clean up screenshot DB
-File.delete('db/screenshot.sqlite3') if File.exist?('db/screenshot.sqlite3')
