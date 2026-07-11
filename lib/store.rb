@@ -18,7 +18,7 @@ end
 require 'store/json_store'
 require 'store/formattable'
 require 'store/service'
-# require 'store/business'
+require 'store/business'
 # require 'store/client'
 # require 'store/invoice'
 # require 'store/timesheet_period'
