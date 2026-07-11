@@ -15,12 +15,11 @@
       <% if @smtp_configured %>
         <a href="/invoices/send/<%= @invoice.id %>"
           class="px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white text-xs font-medium rounded-md">Send</a>
-      <% else %>
-        <span title="SMTP not configured — set SMTP_HOST in .env to enable"
-          class="px-3 py-1.5 bg-gray-200 text-gray-400 text-xs font-medium rounded-md cursor-not-allowed">Send (SMTP not configured)</span>
       <% end %>
+      <a href="/invoices/mark_sent/<%= @invoice.id %>"
+        class="px-3 py-1.5 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 text-xs font-medium rounded-md">Mark as Sent</a>
     <% end %>
-    <% if @invoice.paid_at.nil? && !@invoice.sent_at.nil? %>
+    <% if @invoice.paid_at.nil? && !@invoice.approved_on.nil? %>
       <a href="/invoices/paid/<%= @invoice.id %>"
         class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md">Mark Paid</a>
     <% end %>

@@ -115,6 +115,14 @@ class Invoices < SimplyBase
     redirect url("/view/#{@invoice.id}")
   end
 
+  get '/mark_sent/:id' do
+    @invoice = Invoice[params[:id].to_i]
+    halt 404 unless @invoice
+    @invoice.update(sent_at: Time.now) if @invoice.sent_at.nil?
+    flash[:success] = "Invoice marked as sent!"
+    redirect url("/view/#{@invoice.id}")
+  end
+
   get '/paid/:id' do
     @invoice = Invoice[params[:id].to_i]
     halt 404 unless @invoice
