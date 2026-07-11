@@ -53,8 +53,25 @@ module Store
     end
 
     def soft_delete
+      unbill_timesheets
       Store.move(json_path, File.join(client.invoices_dir, 'archive', "#{num}.json"))
       Store.move(pdf_path, File.join(client.invoices_dir, 'archive', pdf_filename)) if pdf_exists?
+    end
+
+    def unbill_timesheets
+      dir = client.timesheets_dir
+      Store.list_files(dir, '.json').each do |f|
+        path = File.join(dir, f)
+        data = Store.read_json(path)
+        changed = false
+        (data[:entries] || []).each do |e|
+          next unless e[:invoice_num] == num
+          e[:invoiced] = false
+          e[:invoice_num] = nil
+          changed = true
+        end
+        Store.write_json(path, data) if changed
+      end
     end
 
     # ---- formatting / status (ported from models/models.rb) ----

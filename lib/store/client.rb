@@ -71,6 +71,28 @@ module Store
       inv
     end
 
+    def timesheets_dir
+      File.join(dir, 'timesheets')
+    end
+
+    def timesheet_period(key = nil)
+      key ||= TimesheetPeriod.key_for(Date.today, resolved_timesheet_period)
+      TimesheetPeriod.new(self, key)
+    end
+
+    def timesheet_summary
+      total = 0
+      uninvoiced = 0
+      Store.list_files(timesheets_dir, '.json').each do |f|
+        data = Store.read_json(File.join(timesheets_dir, f)) || {}
+        (data[:entries] || []).each do |e|
+          total += 1
+          uninvoiced += 1 unless e[:invoiced]
+        end
+      end
+      { total: total, uninvoiced: uninvoiced }
+    end
+
     def to_h = @data
   end
 end
