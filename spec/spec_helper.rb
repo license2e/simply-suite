@@ -2,6 +2,11 @@ ENV['RACK_ENV'] = 'test'
 ENV['DATABASE_URL'] = 'sqlite://./db/test.sqlite3'
 ENV['SESSION_SECRET'] = 'test-secret-for-specs-must-be-at-least-64-chars-long-padding-here'
 
+require 'tmpdir'
+require 'fileutils'
+$LOAD_PATH.unshift File.expand_path('../lib', __dir__)
+require 'store'
+
 require 'dotenv'
 # Don't load .env in test — use ENV vars above
 
@@ -101,3 +106,17 @@ end
 RSpec.configure do |config|
   config.include SpecHelpers
 end
+
+module DataRootHelper
+  def with_temp_data_root
+    dir = Dir.mktmpdir('simply-suite-spec')
+    prev = Store.instance_variable_get(:@data_root)
+    Store.data_root = dir
+    yield
+  ensure
+    Store.instance_variable_set(:@data_root, prev)
+    FileUtils.remove_entry(dir) if dir && File.directory?(dir)
+  end
+end
+
+RSpec.configure { |c| c.include DataRootHelper }
