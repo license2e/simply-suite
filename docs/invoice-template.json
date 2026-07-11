@@ -27,18 +27,21 @@
     {
       "item": "Strategy",
       "description": "Digital strategy & brand audit",
+      "service_date": "2026-07-01",
       "qty": 1,
       "unit_cost": 1500.00
     },
     {
       "item": "Design",
       "description": "UI/UX design for 10 core screens",
+      "service_date": "2026-07-03",
       "qty": 1,
       "unit_cost": 2000.00
     },
     {
       "item": "Development",
       "description": "Frontend development @ $125/hr",
+      "service_date": "2026-07-07",
       "qty": 10,
       "unit_cost": 125.00
     }

@@ -101,6 +101,7 @@
         <tr>
           <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
           <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+          <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
           <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Cost</th>
           <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
           <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Line Total</th>
@@ -111,6 +112,7 @@
           <tr>
             <td class="px-4 py-3"><%= s.item %></td>
             <td class="px-4 py-3 text-gray-600"><%= s.desc %></td>
+            <td class="px-4 py-3 text-right text-gray-500 whitespace-nowrap"><%= s.formatted_service_date %></td>
             <td class="px-4 py-3 text-right">$<%= s.formatted_cost %></td>
             <td class="px-4 py-3 text-right"><%= s.qty %></td>
             <td class="px-4 py-3 text-right font-medium">$<%= s.formatted_line_total %></td>

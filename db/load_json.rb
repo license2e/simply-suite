@@ -104,14 +104,19 @@ end
 puts "\n── Services"
 invoice.services.each(&:destroy)
 services.each do |s|
+  svc_date = nil
+  if s[:service_date] && !s[:service_date].to_s.empty?
+    svc_date = DateTime.strptime(s[:service_date].to_s, "%Y-%m-%d") rescue nil
+  end
   Service.create(
-    invoice_id: invoice.id,
-    item:       s[:item],
-    desc:       s[:description],
-    qty:        s[:qty].to_i,
-    cost:       s[:unit_cost].to_f
+    invoice_id:   invoice.id,
+    item:         s[:item],
+    desc:         s[:description],
+    service_date: svc_date,
+    qty:          s[:qty].to_f,
+    cost:         s[:unit_cost].to_f
   )
-  puts "   #{s[:item]}: #{s[:qty]} x $#{'%.2f' % s[:unit_cost]}"
+  puts "   #{s[:item]}: #{s[:qty]} x $#{'%.2f' % s[:unit_cost]}#{svc_date ? " (#{svc_date.strftime('%m/%d/%Y')})" : ''}"
 end
 
 puts "\n✓ Done"

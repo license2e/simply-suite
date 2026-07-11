@@ -173,7 +173,7 @@ class Invoices < SimplyBase
             item:         s[:item].empty? ? nil : s[:item],
             desc:         s[:desc].empty? ? nil : s[:desc],
             service_date: s[:service_date].empty? ? nil : DateTime.strptime(s[:service_date], "%m/%d/%Y"),
-            qty:          s[:qty].empty? ? nil : s[:qty].to_i,
+            qty:          s[:qty].empty? ? nil : s[:qty].to_f,
             cost:         s[:cost].empty? ? nil : s[:cost].to_f
           ) if serv
         else
@@ -183,7 +183,7 @@ class Invoices < SimplyBase
             item:         s[:item].empty? ? nil : s[:item],
             desc:         s[:desc].empty? ? nil : s[:desc],
             service_date: s[:service_date].empty? ? nil : DateTime.strptime(s[:service_date], "%m/%d/%Y"),
-            qty:          s[:qty].empty? ? nil : s[:qty].to_i,
+            qty:          s[:qty].empty? ? nil : s[:qty].to_f,
             cost:         s[:cost].empty? ? nil : s[:cost].to_f
           )
         end
@@ -296,11 +296,11 @@ class Invoices < SimplyBase
 
         pdf.move_down 45
 
-        service_data = [["Item", "Description", "Unit Cost", "Quantity", "Line Total"]]
+        service_data = [["Item", "Description", "Date", "Unit Cost", "Qty", "Line Total"]]
         invoice.services.each do |s|
-          service_data << [s.item.to_s, s.desc.to_s, "$#{s.formatted_cost}", s.qty.to_s, "$#{s.formatted_line_total}"]
+          service_data << [s.item.to_s, s.desc.to_s, s.formatted_service_date, "$#{s.formatted_cost}", s.qty.to_s, "$#{s.formatted_line_total}"]
         end
-        service_data << [" ", " ", " ", " ", " "]
+        service_data << [" ", " ", " ", " ", " ", " "]
 
         pdf.table(service_data, width: pdf.bounds.width) do
           style(row(1..-1).columns(0..-1), padding: [4, 5, 4, 5], borders: [:bottom], border_color: 'dddddd')
@@ -310,8 +310,9 @@ class Invoices < SimplyBase
           style(row(0).columns(-1), borders: [:top, :right, :bottom])
           style(row(-1), border_width: 2)
           style(column(2..-1), align: :right)
-          style(columns(0), width: 75)
-          style(columns(1), width: 275)
+          style(columns(0), width: 65)
+          style(columns(1), width: 200)
+          style(columns(2), width: 65)
         end
 
         pdf.move_down 1
