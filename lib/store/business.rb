@@ -78,6 +78,33 @@ module Store
       File.join(dir, 'config', 'settings.json')
     end
 
+    def clients_dir
+      File.join(dir, 'clients')
+    end
+
+    def clients
+      Store.list_dirs(clients_dir).reject { |s| s == 'archive' }
+           .filter_map { |s| find_client(s) }
+           .sort_by { |c| c.name.to_s.downcase }
+    end
+
+    def find_client(slug)
+      data = Store.read_json(File.join(clients_dir, slug, 'client.json'))
+      data ? Client.new(self, data) : nil
+    end
+
+    def create_client(attrs)
+      slug = Store.slugify(attrs[:name], taken: Store.list_dirs(clients_dir))
+      data = { slug: slug }
+      Client::FIELDS.each { |f| data[f] = attrs[f] }
+      data[:timesheet_period] = attrs[:timesheet_period]
+      data[:created_at] = Store.now_iso
+      data[:updated_at] = data[:created_at]
+      c = Client.new(self, data)
+      Store.write_json(File.join(c.dir, 'client.json'), data)
+      c
+    end
+
     def to_h
       @data
     end
