@@ -1,7 +1,8 @@
 # Simply Suite
 
-A Sinatra-based invoicing and client management app. Manage clients, create
-invoices, generate PDFs, and email invoices to clients.
+A Sinatra-based invoicing and client management app. Manage one or more
+businesses, their clients, invoices, and timesheets, and generate PDFs — all
+backed by a plain JSON file store (no database).
 
 ![Invoice view](docs/invoice-screenshot.png)
 
@@ -55,14 +56,13 @@ The PDF is saved alongside the JSON file — `my-invoice.pdf` in this example.
 
 ## Stack
 
-Ruby 3.3 · Sinatra 4 · Sequel ORM · SQLite (default) or MySQL · Puma ·
-Tailwind CSS · Hotwire (Turbo + Stimulus)
+Ruby 3.3 · Sinatra 4 · JSON file store (no database) · Puma ·
+Tailwind CSS · Prawn (PDF)
 
 ## Requirements
 
 - Ruby 3.3
 - Bundler
-- SQLite3 (default) or MySQL
 - The Tailwind standalone CLI binary (see Setup)
 
 ## Setup
@@ -77,13 +77,10 @@ Tailwind CSS · Hotwire (Turbo + Stimulus)
 
 Edit `.env` — at minimum set:
 
-    DATABASE_URL=sqlite://./db/development.sqlite3
     SESSION_SECRET=any_long_random_string
 
-To use MySQL instead: `DATABASE_URL=mysql2://user:pass@host/dbname`
-
-Leave SMTP vars blank to disable email sending (the Send button will be
-greyed out in the UI).
+Optionally set `DATA_DIR` to change where business data is stored (defaults
+to `./data`; see [Data](#data) below).
 
 ### 3. Download the Tailwind standalone CLI
 
@@ -91,21 +88,16 @@ greyed out in the UI).
     chmod +x tailwindcss-linux-x64
     mv tailwindcss-linux-x64 tailwindcss
 
-### 4. Run migrations
-
-    bundle exec ruby db/migrate.rb
-
-### 5. Create an admin user
-
-    bundle exec ruby db/seeds.rb
-
-### 6. Build Tailwind CSS
+### 4. Build Tailwind CSS
 
 The `public/css/input.css` file uses `@source` directives to scan ERB and Ruby
 files for class names — Tailwind only emits CSS for classes it finds there.
 Always rebuild after pulling changes:
 
     ./tailwindcss -i public/css/input.css -o public/css/tailwind.css
+
+There's no database to migrate and no seed user to create — the first run
+creates or selects a business right in the browser (see Onboarding below).
 
 ## Running
 
@@ -127,30 +119,42 @@ Or individually:
 
 App runs at http://localhost:9393
 
+### Onboarding
+
+There's no login and no seed data. The first request redirects to
+`/businesses`, where you create your first business (name + address, optional
+logo) or, once one exists, pick which business to work in. The chosen
+business is kept in the session — everything else (clients, invoices,
+timesheets) is scoped underneath it.
+
 ## Routes
 
 | Path | Description |
 |------|-------------|
-| `/` | Dashboard (requires login) |
-| `/login` | Login / logout |
-| `/clients` | List, create, edit clients |
-| `/timesheets` | Timesheets (per-client time tracking) |
-| `/settings` | Company info and logo |
+| `/` | Dashboard (requires an active business) |
+| `/businesses` | Create a business, or choose one to switch into |
+| `/businesses/logo` | Serves the current business's logo |
+| `/clients` | List clients |
+| `/clients/create` | New client |
+| `/clients/view/:client_key` | View client |
+| `/clients/edit/:client_key` | Edit client |
+| `/clients/delete/:client_key` | Soft-delete client (and its invoices) |
+| `/timesheets` | Timesheets overview, all clients |
+| `/timesheets/:client_key` | Timesheet for one client/period (`?period=YYYY-MM`) |
+| `/timesheets/:client_key/invoice` | Roll un-invoiced entries in a period into a draft invoice |
+| `/settings` | Business info and logo upload |
 | `/invoices/:client_key` | List invoices for a client |
-| `/invoices/create/:client_key` | New invoice |
-| `/invoices/:client_key/:invoice_number` | View invoice |
-| `/invoices/:client_key/:invoice_number/preview` | HTML preview (modal) |
-| `/invoices/approve/:id` | Approve invoice |
-| `/invoices/send/:id` | Email invoice (requires SMTP config) |
-| `/invoices/paid/:id` | Mark as paid |
+| `/invoices/:client_key/create` | New invoice |
+| `/invoices/:client_key/:num` | View invoice |
+| `/invoices/:client_key/:num/edit` | Edit invoice |
+| `/invoices/:client_key/:num/preview` | HTML preview (modal) |
+| `/invoices/:client_key/:num/pdf` | Rendered invoice PDF |
+| `/invoices/:client_key/:num/approve` | Approve invoice |
+| `/invoices/:client_key/:num/mark_sent` | Mark invoice as sent |
+| `/invoices/:client_key/:num/paid` | Mark invoice as paid |
+| `/invoices/:client_key/:num/delete` | Soft-delete invoice |
 
 ## Scripts
-
-### Batch invoice sending
-
-Sends all approved, unsent, past-due invoices. Intended to be run as a cron job.
-
-    bundle exec ruby scripts/send_approve_invoices.rb
 
 ### Generate PDF from a JSON file
 
@@ -182,8 +186,37 @@ Requires Chrome or Chromium to be installed.
 
     bundle exec ruby scripts/generate_invoice_screenshot.rb
 
-## Database
+## Data
 
-Schema is managed via migrations in `db/migrations/`. To apply:
+All app data — businesses, clients, invoices, timesheets, logos, and
+rendered invoice PDFs — lives under a single directory tree as plain JSON
+files (plus the PDFs themselves). No database required:
 
-    bundle exec ruby db/migrate.rb
+    data/<business-slug>/
+      config/
+        settings.json       # company info + defaults (timesheet period, terms, notes)
+        logo.png            # optional, uploaded via /settings or /businesses
+      clients/
+        <client-slug>/
+          client.json
+          invoices/
+            <num>.json
+            <prefix>-<num>.pdf
+            archive/         # soft-deleted invoices
+          timesheets/
+            <YYYY-MM>.json   # one file per period (granularity is per-client)
+        archive/
+          <client-slug>/     # soft-deleted clients (whole tree moved here)
+
+The root directory defaults to `./data` and is git-ignored (it's real
+business data, never committed). Override it with `DATA_DIR` in `.env` to
+point at another location — e.g. a mounted volume for backups.
+
+Slugs (business and client) are assigned once at creation and are immutable;
+renaming a business or client never moves its directory.
+
+This app previously stored data in a Sequel/SQLite (or MySQL) database. That
+data was migrated to the JSON store with a one-time script
+(`scripts/export_to_json.rb`, since removed along with the `sequel`,
+`sqlite3`, `mysql2`, `mail`, and `bcrypt` gems) — there is no migration path
+left to run; new installs start directly on the JSON store via `/businesses`.

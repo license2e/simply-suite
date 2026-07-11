@@ -8,16 +8,7 @@ gem 'erubi'
 gem 'sinatra-flash'
 gem 'rack-protection'
 
-gem 'sequel'
-gem 'sqlite3', '~> 2.0'
-
-group :mysql do
-  gem 'mysql2'
-end
-
 gem 'dotenv'
-gem 'bcrypt'
-gem 'mail'
 
 gem 'prawn', '~> 2.5'
 gem 'prawn-table'

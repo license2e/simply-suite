@@ -1,8 +1,5 @@
 .env
 logs/
-public/pdfs/
-public/client-assets/*
-!public/client-assets/.gitkeep
 public/css/tailwind.css
 tailwindcss
 db/*.sqlite3
