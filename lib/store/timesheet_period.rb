@@ -57,6 +57,7 @@ module Store
         svc = Service.new(row).to_h
         target_key = svc[:service_date] ? self.class.key_for(svc[:service_date], granularity) : key
         id = row[:id].to_s
+        next if !id.empty? && deletes.include?(id)
         if !id.empty? && by_id[id]
           existing = by_id[id]
           next if existing[:invoiced]

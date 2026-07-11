@@ -53,4 +53,58 @@ RSpec.describe Store::TimesheetPeriod do
     inv.soft_delete
     expect(client.timesheet_summary).to eq(total: 1, uninvoiced: 1)
   end
+
+  it 'removes a non-invoiced entry via deletes and archives it' do
+    client.timesheet_period('2026-07').apply(
+      rows: [{ item: 'Dev', desc: 'x', service_date: '2026-07-05', qty: 1, cost: 100 }], deletes: []
+    )
+    id = client.timesheet_period('2026-07').entries.first[:id]
+
+    client.timesheet_period('2026-07').apply(rows: [], deletes: [id])
+
+    expect(client.timesheet_period('2026-07').entries).to be_empty
+    archive_path = File.join(client.timesheets_dir, 'archive', '2026-07.json')
+    archived = Store.read_json(archive_path)
+    expect(archived[:entries].map { |e| e[:id] }).to eq([id])
+  end
+
+  it 'is a no-op when deleting an invoiced entry' do
+    client.timesheet_period('2026-07').apply(
+      rows: [{ item: 'Dev', desc: 'x', service_date: '2026-07-05', qty: 1, cost: 100 }], deletes: []
+    )
+    id = client.timesheet_period('2026-07').entries.first[:id]
+    client.timesheet_period('2026-07').create_invoice
+
+    client.timesheet_period('2026-07').apply(rows: [], deletes: [id])
+
+    reloaded = client.timesheet_period('2026-07')
+    expect(reloaded.entries.map { |e| e[:id] }).to eq([id])
+    expect(reloaded.entries.first[:invoiced]).to eq(true)
+    archive_path = File.join(client.timesheets_dir, 'archive', '2026-07.json')
+    expect(Store.read_json(archive_path)).to be_nil
+  end
+
+  it 'lets delete win over a same-call edit that re-buckets the same id (no duplication)' do
+    client.timesheet_period('2026-07').apply(
+      rows: [{ item: 'Dev', desc: 'x', service_date: '2026-07-05', qty: 1, cost: 100 }], deletes: []
+    )
+    id = client.timesheet_period('2026-07').entries.first[:id]
+
+    client.timesheet_period('2026-07').apply(
+      rows: [{ id: id, item: 'Dev', desc: 'x', service_date: '2026-08-03', qty: 1, cost: 100 }],
+      deletes: [id]
+    )
+
+    expect(client.timesheet_period('2026-08').entries).to be_empty
+    expect(client.timesheet_period('2026-07').entries).to be_empty
+    archive_path = File.join(client.timesheets_dir, 'archive', '2026-07.json')
+    archived = Store.read_json(archive_path)
+    expect(archived[:entries].map { |e| e[:id] }).to eq([id])
+  end
+
+  it 'computes prev_key/next_key for monthly granularity' do
+    p = client.timesheet_period('2026-07')
+    expect(p.prev_key).to eq('2026-06')
+    expect(p.next_key).to eq('2026-08')
+  end
 end
