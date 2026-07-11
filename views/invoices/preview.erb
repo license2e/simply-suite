@@ -8,14 +8,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 13px; color: #333; background: #eee; }
 
-    .toolbar { background: #1e293b; padding: 10px 0; }
-    .toolbar-inner { max-width: 860px; margin: 0 auto; padding: 0 50px; display: flex; gap: 8px; align-items: center; }
-    .btn { padding: 6px 14px; font-size: 12px; font-weight: 500; border-radius: 5px; cursor: pointer; text-decoration: none; border: 1px solid transparent; display: inline-block; }
-    .btn-back { background: transparent; border-color: rgba(255,255,255,0.25); color: rgba(255,255,255,0.8); }
-    .btn-back:hover { border-color: rgba(255,255,255,0.5); color: white; }
-    .btn-print { background: white; color: #1e293b; }
-    .btn-print:hover { background: #f1f5f9; }
-
     .page { background: white; max-width: 760px; margin: 30px auto; padding: 56px; box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
 
     .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 48px; }
@@ -55,20 +47,12 @@
     .footer-value { color: #444; line-height: 1.6; }
 
     @media print {
-      .toolbar { display: none; }
       body { background: white; }
       .page { box-shadow: none; margin: 0; padding: 36px; }
     }
   </style>
 </head>
 <body>
-
-<div class="toolbar">
-  <div class="toolbar-inner">
-    <a href="/invoices/<%= @invoice.client.client_key %>/<%= @invoice.client.client_prefix %>-<%= @invoice.num %>" class="btn btn-back">&larr; Back</a>
-    <button onclick="window.print()" class="btn btn-print">Print / Save as PDF</button>
-  </div>
-</div>
 
 <div class="page">
   <div class="header">
