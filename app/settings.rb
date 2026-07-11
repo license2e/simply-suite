@@ -5,12 +5,12 @@ class Settings < SimplyBase
 
   before { authorize! }
 
-  LOGO_PATH = 'css/images/logo.png'.freeze
+  LOGO_UPLOAD_PATH = 'client-assets/logo.png'.freeze
 
   get '/' do
     @company = Company.first || Company.new
-    logo_local = File.join(settings.public_folder, LOGO_PATH)
-    @logo_url = File.exist?(logo_local) ? "/#{LOGO_PATH}?v=#{File.mtime(logo_local).to_i}" : nil
+    logo = resolve_logo
+    @logo_url = logo ? logo[:web] : nil
     @page_title = 'Settings'
     v :'settings/index'
   end
@@ -45,7 +45,7 @@ class Settings < SimplyBase
       flash[:error] = "Please upload a valid image file."
       redirect url('/')
     end
-    dest = File.join(settings.public_folder, LOGO_PATH)
+    dest = File.join(settings.public_folder, LOGO_UPLOAD_PATH)
     FileUtils.cp(upload[:tempfile].path, dest)
     flash[:success] = "Logo updated."
     redirect url('/')

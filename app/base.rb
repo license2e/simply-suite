@@ -27,7 +27,7 @@ class SimplyBase < Sinatra::Base
   set :erb, escape_html: true
   set :layout_default, :'admin/layout-default'
 
-  use Rack::Static, urls: ['/css', '/js', '/pdfs', '/favicon.ico', '/favicon.gif'], root: 'public'
+  use Rack::Static, urls: ['/css', '/js', '/pdfs', '/client-assets', '/favicon.ico', '/favicon.gif'], root: 'public'
 
   before do
     headers 'Content-Type' => 'text/html; charset=utf-8'
@@ -49,6 +49,21 @@ class SimplyBase < Sinatra::Base
 
   def smtp_configured?
     ENV['SMTP_HOST'] && !ENV['SMTP_HOST'].empty?
+  end
+
+  # Resolves the logo, checking client-assets/ override before the default.
+  # Returns { local: '/abs/path/to/logo.png', web: '/web/path/logo.png?v=...' }
+  # or nil if no logo exists anywhere.
+  def resolve_logo(public_path = settings.public_folder)
+    override = File.join(public_path, 'client-assets', 'logo.png')
+    if File.exist?(override)
+      return { local: override, web: "/client-assets/logo.png?v=#{File.mtime(override).to_i}" }
+    end
+    default = File.join(public_path, 'css', 'images', 'logo.png')
+    if File.exist?(default)
+      return { local: default, web: "/css/images/logo.png?v=#{File.mtime(default).to_i}" }
+    end
+    nil
   end
 
   def v(template, options = {})

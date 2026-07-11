@@ -56,7 +56,7 @@ class Invoices < SimplyBase
     end
     process_invoice_services(params[:invoice], @invoice)
     if validate_invoice(@invoice)
-      create_invoice_pdf(settings.public_folder, @invoice, '/css/images/logo.png', Company.first)
+      create_invoice_pdf(settings.public_folder, @invoice, Company.first)
       flash[:success] = "Invoice created successfully"
       redirect url("/#{@invoice.client.client_key}")
     end
@@ -75,7 +75,7 @@ class Invoices < SimplyBase
     end
     process_invoice_services(params[:invoice], @invoice)
     if validate_invoice(@invoice)
-      create_invoice_pdf(settings.public_folder, @invoice, '/css/images/logo.png', Company.first)
+      create_invoice_pdf(settings.public_folder, @invoice, Company.first)
       flash[:success] = "Invoice updated successfully"
       redirect url("/#{@invoice.client.client_key}")
     end
@@ -141,7 +141,6 @@ class Invoices < SimplyBase
     @invoice = Invoice.first(client_id: @client.id, num: num)
     halt 404 unless @invoice
     @company = Company.first
-    @logopath = '/css/images/logo.png'
     pdf_paths = get_invoice_pdf_path(settings.public_folder, @invoice)
     @pdf_invoice_path = File.exist?(pdf_paths[:local]) ? pdf_paths[:web] : nil
     @smtp_configured = smtp_configured?
@@ -156,8 +155,8 @@ class Invoices < SimplyBase
     @invoice = Invoice.first(client_id: @client.id, num: num)
     halt 404 unless @invoice
     @company = Company.first
-    logo_local = File.join(settings.public_folder, 'css/images/logo.png')
-    @logo_url = File.exist?(logo_local) ? "/css/images/logo.png?v=#{File.mtime(logo_local).to_i}" : nil
+    logo = resolve_logo
+    @logo_url = logo ? logo[:web] : nil
     erb :'invoices/preview', layout: false
   end
 
@@ -230,12 +229,13 @@ class Invoices < SimplyBase
       }
     end
 
-    def create_invoice_pdf(public_path, invoice, logopath, company = nil)
+    def create_invoice_pdf(public_path, invoice, company = nil)
       paths = get_invoice_pdf_path(public_path, invoice)
       local_file = paths[:local]
+      logo = resolve_logo(public_path)
 
       Prawn::Document.generate(local_file) do |pdf|
-        logopath_local = File.join(public_path, logopath)
+        logopath_local = logo ? logo[:local] : nil
         w      = pdf.bounds.width
         base   = 9
         small  = 7
@@ -268,7 +268,7 @@ class Invoices < SimplyBase
 
         # Right: logo → "INVOICE" → # → date → balance box (cursor flow)
         pdf.move_cursor_to header_top
-        if File.exist?(logopath_local)
+        if logopath_local && File.exist?(logopath_local)
           pdf.image logopath_local, fit: [200, 55], position: :right
           pdf.move_down 6
         end
