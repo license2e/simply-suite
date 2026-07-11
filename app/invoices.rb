@@ -56,6 +56,7 @@ class Invoices < SimplyBase
     @action_url = "/invoices/#{@client.slug}/create"
     @submit_value = 'Create Invoice'
     @page_title = "New Invoice — #{@client.name}"
+    @new_record = true
     v :'invoices/create'
   end
 
@@ -76,13 +77,16 @@ class Invoices < SimplyBase
     @action_url = "/invoices/#{@client.slug}/#{@invoice.num}"
     @submit_value = 'Update Invoice'
     @page_title = "Edit Invoice — #{@client.name}"
+    @new_record = false
     v :'invoices/edit'
   end
 
   post '/:client_key/:num' do
     client = find_client!(params[:client_key])
     invoice = find_invoice!(client, params[:num])
-    invoice.update(gather_invoice_data(params[:invoice]).merge(services: submitted_services(params[:invoice]), is_complete: true))
+    data = gather_invoice_data(params[:invoice]).merge(services: submitted_services(params[:invoice]), is_complete: true)
+    data.delete(:num)   # invoice number is immutable after creation — never re-key the file
+    invoice.update(data)
     create_invoice_pdf(invoice, current_business)
     flash[:success] = 'Invoice updated successfully'
     redirect "/invoices/#{client.slug}"

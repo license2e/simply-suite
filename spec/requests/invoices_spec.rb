@@ -50,4 +50,49 @@ RSpec.describe 'Invoices', type: :request do
     get '/invoices/widgets-inc/001/paid'
     expect(@client.find_invoice('001').get_status).to eq('paid')
   end
+
+  it 'update replaces services and keeps the number even if a different num is submitted' do
+    @client.create_invoice(num: '001', invoice_date: nil,
+      services: [{ item: 'Old', desc: 'old desc', qty: 1, cost: 100 }])
+
+    post '/invoices/widgets-inc/001', { 'invoice[num]' => '999', 'invoice[invoice_date]' => '07/09/2026',
+      'invoice[total_amount]' => '250', 'invoice[total_discount]' => '0', 'invoice[amount_paid]' => '0',
+      'invoice[terms]' => 'Net 30', 'invoice[notes]' => 'thanks',
+      'invoice[services][0][item]' => 'New', 'invoice[services][0][desc]' => 'new desc',
+      'invoice[services][0][service_date]' => '07/05/2026', 'invoice[services][0][qty]' => '3',
+      'invoice[services][0][cost]' => '50' }.merge(svc(1))
+
+    expect(@client.find_invoice('001')).not_to be_nil
+    expect(@client.find_invoice('999')).to be_nil
+
+    inv = @client.find_invoice('001')
+    expect(inv.services.map(&:item)).to eq(%w[New Dev])
+  end
+
+  it 'drops blank service rows on save' do
+    @client.create_invoice(num: '001', services: [])
+
+    post '/invoices/widgets-inc/001', { 'invoice[num]' => '001', 'invoice[invoice_date]' => '07/09/2026',
+      'invoice[total_amount]' => '250', 'invoice[total_discount]' => '0', 'invoice[amount_paid]' => '0',
+      'invoice[terms]' => 'Net 30', 'invoice[notes]' => 'thanks',
+      'invoice[services][0][item]' => '', 'invoice[services][0][desc]' => '',
+      'invoice[services][0][service_date]' => '', 'invoice[services][0][qty]' => '',
+      'invoice[services][0][cost]' => '' }.merge(svc(1))
+
+    inv = @client.find_invoice('001')
+    expect(inv.services.size).to eq(1)
+    expect(inv.services.first.item).to eq('Dev')
+  end
+
+  it 'delete archives the invoice' do
+    @client.create_invoice(num: '001', services: [])
+    get '/invoices/widgets-inc/001/delete'
+    expect(@client.find_invoice('001')).to be_nil
+  end
+
+  it 'mark_sent sets sent_at' do
+    @client.create_invoice(num: '001', services: [])
+    get '/invoices/widgets-inc/001/mark_sent'
+    expect(@client.find_invoice('001').get_status).to eq('sent')
+  end
 end
