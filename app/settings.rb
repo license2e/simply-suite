@@ -3,13 +3,11 @@ require 'fileutils'
 class Settings < SimplyBase
   set :layout_default, :'admin/layout-default'
 
-  before { authorize! }
-
-  LOGO_UPLOAD_PATH = 'client-assets/logo.png'.freeze
+  before { require_business! }
 
   get '/' do
-    @company = Company.first || Company.new
-    logo = resolve_logo
+    @business = current_business
+    logo = @business.resolve_logo
     @logo_url = logo ? logo[:web] : nil
     @page_title = 'Settings'
     v :'settings/index'
@@ -17,37 +15,27 @@ class Settings < SimplyBase
 
   post '/company' do
     p = params[:company]
-    attrs = {
-      name:    p[:name],
-      contact: p[:contact],
-      email:   p[:email],
-      street:  p[:street],
-      city:    p[:city],
-      state:   p[:state],
-      zip:     p[:zip]
-    }
-    if (company = Company.first)
-      company.update(attrs)
-    else
-      Company.create(attrs)
-    end
-    flash[:success] = "Company info saved."
-    redirect url('/')
+    current_business.update(
+      name: p[:name], contact: p[:contact], email: p[:email],
+      street: p[:street], city: p[:city], state: p[:state], zip: p[:zip],
+      defaults: { timesheet_period: p[:timesheet_period], terms: p[:terms], notes: p[:notes] }
+    )
+    flash[:success] = 'Company info saved.'
+    redirect '/settings'
   end
 
   post '/logo' do
     upload = params[:logo]
     unless upload && upload[:filename] && !upload[:filename].empty?
-      flash[:error] = "Please select an image file."
-      redirect url('/')
+      flash[:error] = 'Please select an image file.'
+      redirect '/settings'
     end
     unless upload[:type].to_s.start_with?('image/')
-      flash[:error] = "Please upload a valid image file."
-      redirect url('/')
+      flash[:error] = 'Please upload a valid image file.'
+      redirect '/settings'
     end
-    dest = File.join(settings.public_folder, LOGO_UPLOAD_PATH)
-    FileUtils.cp(upload[:tempfile].path, dest)
-    flash[:success] = "Logo updated."
-    redirect url('/')
+    current_business.save_logo(upload[:tempfile].path)
+    flash[:success] = 'Logo updated.'
+    redirect '/settings'
   end
 end

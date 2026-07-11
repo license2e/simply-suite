@@ -5,13 +5,13 @@
     <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">From</h2>
     <form action="/settings/company" method="post" class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
       <% [
-        ['Company',  'name',    'text',  @company.name],
-        ['Contact',  'contact', 'text',  @company.contact],
-        ['Email',    'email',   'email', @company.email],
-        ['Street',   'street',  'text',  @company.street],
-        ['City',     'city',    'text',  @company.city],
-        ['State',    'state',   'text',  @company.state],
-        ['ZIP',      'zip',     'text',  @company.zip],
+        ['Company',  'name',    'text',  @business.name],
+        ['Contact',  'contact', 'text',  @business.contact],
+        ['Email',    'email',   'email', @business.email],
+        ['Street',   'street',  'text',  @business.street],
+        ['City',     'city',    'text',  @business.city],
+        ['State',    'state',   'text',  @business.state],
+        ['ZIP',      'zip',     'text',  @business.zip],
       ].each do |label, field, type, val| %>
         <div class="px-5 py-4 flex items-center gap-4">
           <label class="w-32 text-xs font-medium text-gray-500 uppercase tracking-wider flex-shrink-0"><%= label %></label>
@@ -19,6 +19,24 @@
             class="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
         </div>
       <% end %>
+      <div class="px-5 py-4 flex items-center gap-4">
+        <label class="w-32 text-xs font-medium text-gray-500 uppercase tracking-wider flex-shrink-0">Timesheet period</label>
+        <select name="company[timesheet_period]" class="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
+          <% %w[daily weekly monthly quarterly].each do |g| %>
+            <option value="<%= g %>" <%= 'selected' if @business.defaults[:timesheet_period] == g %>><%= g.capitalize %></option>
+          <% end %>
+        </select>
+      </div>
+      <div class="px-5 py-4 flex items-center gap-4">
+        <label class="w-32 text-xs font-medium text-gray-500 uppercase tracking-wider flex-shrink-0">Terms</label>
+        <input type="text" name="company[terms]" value="<%= @business.defaults[:terms] %>"
+          class="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
+      </div>
+      <div class="px-5 py-4 flex items-center gap-4">
+        <label class="w-32 text-xs font-medium text-gray-500 uppercase tracking-wider flex-shrink-0">Notes</label>
+        <input type="text" name="company[notes]" value="<%= @business.defaults[:notes] %>"
+          class="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
+      </div>
       <div class="px-5 py-4">
         <button type="submit"
           class="px-5 py-2 bg-slate-700 hover:bg-slate-800 text-white text-sm font-medium rounded-md transition-colors cursor-pointer">Save</button>
