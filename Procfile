@@ -1,2 +1,2 @@
-web: bundle exec rerun --no-notify -- bundle exec puma -p 9393
-css: ./tailwindcss -i public/css/input.css -o public/css/tailwind.css --watch
+web: bundle exec rerun --no-notify -- bundle exec puma -p 9393 2>&1 | grep -v "stty:"
+css: bundle exec rerun --no-notify --pattern "views/**/*.erb,app/**/*.rb,public/css/input.css" -- ./tailwindcss -i public/css/input.css -o public/css/tailwind.css 2>&1 | grep -v "stty:"
