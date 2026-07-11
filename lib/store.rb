@@ -2,6 +2,7 @@ require 'json'
 require 'fileutils'
 require 'securerandom'
 require 'date'
+require 'time'
 
 module Store
   APP_ROOT = File.expand_path('..', __dir__)
@@ -20,5 +21,5 @@ require 'store/formattable'
 require 'store/service'
 require 'store/business'
 require 'store/client'
-# require 'store/invoice'
+require 'store/invoice'
 # require 'store/timesheet_period'

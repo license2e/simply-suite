@@ -41,6 +41,36 @@ module Store
       File.join(business.clients_dir, slug)
     end
 
+    def invoices_dir
+      File.join(dir, 'invoices')
+    end
+
+    def invoices
+      Store.list_files(invoices_dir, '.json')
+           .filter_map { |f| find_invoice(File.basename(f, '.json')) }
+           .sort_by { |i| -i.num.to_i }
+    end
+
+    def find_invoice(num)
+      data = Store.read_json(File.join(invoices_dir, "#{num}.json"))
+      data ? Invoice.new(self, data) : nil
+    end
+
+    def next_num
+      nums = Store.list_files(invoices_dir, '.json').map { |f| File.basename(f, '.json') }
+      return '001' if nums.empty?
+      width = nums.map(&:length).max            # pad to widest existing (no forced min once numbers exist)
+      max   = nums.map(&:to_i).max
+      format("%0#{width}d", max + 1)
+    end
+
+    def create_invoice(attrs)
+      num = attrs[:num].to_s.empty? ? next_num : attrs[:num].to_s
+      inv = Invoice.new(self, Invoice.blank_data(num))
+      inv.update(attrs.merge(num: num))
+      inv
+    end
+
     def to_h = @data
   end
 end
