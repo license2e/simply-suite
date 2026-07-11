@@ -41,7 +41,7 @@ Open `my-invoice.json` and fill in your details:
 - `from` — your company name, contact, email, and address.
 - `bill_to` — client name, contact, email, and address.
 - `invoice` — invoice number, date (`YYYY-MM-DD`), payment terms, and notes.
-- `services` — line items, each with `item`, `description`, `qty`, and `unit_cost`.
+- `services` — line items, each with `item`, `description`, `service_date` (`YYYY-MM-DD`), `qty`, and `unit_cost`.
 - `discount_percentage` — set to `0` for no discount.
 - `amount_paid` — any deposit already received; set to `0` if nothing has been paid.
 
@@ -101,16 +101,29 @@ greyed out in the UI).
 
 ### 6. Build Tailwind CSS
 
+The `public/css/input.css` file uses `@source` directives to scan ERB and Ruby
+files for class names — Tailwind only emits CSS for classes it finds there.
+Always rebuild after pulling changes:
+
     ./tailwindcss -i public/css/input.css -o public/css/tailwind.css
 
 ## Running
 
-    bundle exec foreman start
+### With Claude Code (recommended)
 
-Or manually:
+    /dev          # start server + Tailwind watcher in background (auto-reloads)
+    /dev stop     # stop everything
 
-    bundle exec puma -p 9393 -R config.ru   # web server
-    ./tailwindcss -i public/css/input.css -o public/css/tailwind.css --watch  # CSS watcher
+### Manually
+
+    bundle exec foreman start   # uses Procfile (puma + Tailwind via rerun)
+
+Or individually:
+
+    bundle exec rerun --no-notify -- bundle exec puma -p 9393     # web server
+    bundle exec rerun --no-notify \
+      --pattern "views/**/*.erb,app/**/*.rb,public/css/input.css" \
+      -- ./tailwindcss -i public/css/input.css -o public/css/tailwind.css   # CSS
 
 App runs at http://localhost:9393
 
@@ -121,9 +134,12 @@ App runs at http://localhost:9393
 | `/` | Dashboard (requires login) |
 | `/login` | Login / logout |
 | `/clients` | List, create, edit clients |
+| `/timesheets` | Timesheets (per-client time tracking) |
+| `/settings` | Company info and logo |
 | `/invoices/:client_key` | List invoices for a client |
 | `/invoices/create/:client_key` | New invoice |
-| `/invoices/view/:id` | View invoice + PDF |
+| `/invoices/:client_key/:invoice_number` | View invoice |
+| `/invoices/:client_key/:invoice_number/preview` | HTML preview (modal) |
 | `/invoices/approve/:id` | Approve invoice |
 | `/invoices/send/:id` | Email invoice (requires SMTP config) |
 | `/invoices/paid/:id` | Mark as paid |
