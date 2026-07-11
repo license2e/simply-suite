@@ -82,6 +82,9 @@
       <% end %>
     </div>
     <div class="invoice-meta">
+      <% if @logo_url %>
+        <img src="<%= @logo_url %>" alt="" style="max-width:160px;max-height:64px;object-fit:contain;display:block;margin-left:auto;margin-bottom:16px;">
+      <% end %>
       <p class="invoice-title">INVOICE</p>
       <p class="meta-row"><strong><%= @invoice.client.client_prefix %>-<%= @invoice.num %></strong></p>
       <p class="meta-row"><%= @invoice.formatted_invoice_date %></p>

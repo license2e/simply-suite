@@ -104,8 +104,9 @@ class Invoices < SimplyBase
     num = params[:invoice_number].delete_prefix("#{@client.client_prefix}-")
     @invoice = Invoice.first(client_id: @client.id, num: num)
     halt 404 unless @invoice
-    halt 403 unless @invoice.approved_on
     @company = Company.first
+    logo_local = File.join(settings.public_folder, 'css/images/logo.png')
+    @logo_url = File.exist?(logo_local) ? "/css/images/logo.png?v=#{File.mtime(logo_local).to_i}" : nil
     erb :'invoices/preview', layout: false
   end
 
