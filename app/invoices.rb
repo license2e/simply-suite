@@ -98,8 +98,11 @@ class Invoices < SimplyBase
     v :'invoices/view'
   end
 
-  get '/preview/:id' do
-    @invoice = Invoice[params[:id].to_i]
+  get '/:client_key/:invoice_number/preview' do
+    @client = Client.first(client_key: params[:client_key])
+    halt 404 unless @client
+    num = params[:invoice_number].delete_prefix("#{@client.client_prefix}-")
+    @invoice = Invoice.first(client_id: @client.id, num: num)
     halt 404 unless @invoice
     halt 403 unless @invoice.approved_on
     @company = Company.first
