@@ -1,51 +1,45 @@
+# spec/requests/clients_spec.rb
 require 'spec_helper'
+require 'rack/test'
 
-RSpec.describe 'Clients' do
-  # Build a combined rack app that shares sessions between Auth and Clients
-  let(:combined_app) do
-    Rack::Builder.new do
-      map('/login') { run Auth }
-      map('/clients') { run Clients }
+RSpec.describe 'Clients', type: :request do
+  include Rack::Test::Methods
+  def app
+    built = Rack::Builder.parse_file(File.expand_path('../../config.ru', __dir__))
+    built.is_a?(Array) ? built.first : built   # Rack 2 returns [app, opts]; Rack 3 returns app
+  end
+
+  around do |ex|
+    with_temp_data_root do
+      @biz = Store::Business.create(name: 'Biz', contact: 'C', email: 'b@x.com', street: '1', city: 'CLT', state: 'NC', zip: '28203')
+      ex.run
     end
   end
 
-  def app = combined_app
-
-  def login!
-    create_admin
-    post '/login/', { 'login[login]' => 'admin@test.com', 'login[password]' => 'password123' }
+  def select_business
+    post "/businesses/#{@biz.slug}/select"
   end
 
-  before { login! }
+  it 'creates, updates, lists and deletes a client' do
+    select_business
+    post '/clients/create', client: { name: 'Widgets Inc', client_prefix: 'WID', contact: 'J',
+                                       email: 'j@w.com', street: '2', street2: '', city: 'CLT', state: 'NC', zip: '28203' }
+    expect(@biz.find_client('widgets-inc')).not_to be_nil
 
-  describe 'GET /clients/' do
-    it 'returns 200' do
-      get '/clients/'
-      expect(last_response.status).to eq(200)
-    end
+    get '/clients'
+    expect(last_response.body).to include('Widgets Inc')
 
-    it 'shows existing clients' do
-      create_test_client
-      get '/clients/'
-      expect(last_response.body).to include('Test Corp')
-    end
+    post '/clients/widgets-inc', client: { client_prefix: 'WID', name: 'Widgets LLC', contact: 'J',
+                                           email: 'j@w.com', street: '2', street2: '', city: 'CLT', state: 'NC', zip: '28203' }
+    expect(@biz.find_client('widgets-inc').name).to eq('Widgets LLC')
+
+    get '/clients/delete/widgets-inc'
+    expect(@biz.find_client('widgets-inc')).to be_nil
   end
 
-  describe 'POST /clients/create' do
-    it 'creates a client and redirects' do
-      expect {
-        post '/clients/create', {
-          'client[name]' => 'New Co',
-          'client[client_prefix]' => 'NEW',
-          'client[contact]' => 'Jane',
-          'client[email]' => 'jane@newco.com',
-          'client[street]' => '1 Main St',
-          'client[city]' => 'Charlotte',
-          'client[state]' => 'NC',
-          'client[zip]' => '28202'
-        }
-      }.to change { Client.count }.by(1)
-      expect(last_response.status).to eq(302)
-    end
+  it 'redirects to /businesses without an active business' do
+    get '/clients'
+    expect(last_response.status).to eq(302)
+    expect(last_response.location).to include('/businesses')
   end
 end

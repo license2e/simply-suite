@@ -1,18 +1,18 @@
 <div class="max-w-2xl space-y-6">
   <div class="flex gap-3">
-    <a href="/clients/edit/<%= @client.client_key %>"
+    <a href="/clients/edit/<%= @client.slug %>"
       class="px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white text-sm font-medium rounded-md transition-colors">Edit</a>
-    <a href="/invoices/<%= @client.client_key %>"
+    <a href="/invoices/<%= @client.slug %>"
       class="px-4 py-2 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 text-sm font-medium rounded-md transition-colors">Invoices</a>
-    <a href="/clients/delete/<%= @client.client_key %>"
+    <a href="/clients/delete/<%= @client.slug %>"
       onclick="return confirm('Delete <%= @client.name %> and ALL their invoices? This cannot be undone.')"
       class="px-4 py-2 bg-white border border-red-300 hover:border-red-400 text-red-600 text-sm font-medium rounded-md transition-colors">Delete</a>
   </div>
 
   <div class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
     <% {
-      'Client Key'   => @client.client_key,
-      'Prefix'       => @client.client_prefix,
+      'Client Key'   => @client.slug,
+      'Prefix'       => @client.prefix,
       'Name'         => @client.name,
       'Contact'      => @client.contact,
       'Email'        => @client.email,

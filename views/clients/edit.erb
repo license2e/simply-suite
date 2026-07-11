@@ -1,1 +1,10 @@
+<% content_for :extra_fields do %>
+  <label class="block text-sm text-gray-600">Timesheet period (override)</label>
+  <select name="client[timesheet_period]" class="border rounded px-3 py-2">
+    <option value="">Use business default (<%= current_business.defaults[:timesheet_period] %>)</option>
+    <% %w[daily weekly monthly quarterly].each do |g| %>
+      <option value="<%= g %>" <%= 'selected' if @client.timesheet_period_override == g %>><%= g.capitalize %></option>
+    <% end %>
+  </select>
+<% end %>
 <%== erb :'clients/_form' %>

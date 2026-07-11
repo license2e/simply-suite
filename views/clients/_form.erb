@@ -1,20 +1,25 @@
 <div class="max-w-2xl">
   <form action="<%= @action_url %>" method="post" class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
     <% [
-      ['Client Name',   'name',          'text',  @client.name],
-      ['Client Prefix', 'client_prefix', 'text',  @client.client_prefix],
-      ['Contact',       'contact',       'text',  @client.contact],
-      ['Email',         'email',         'email', @client.email],
-      ['Street',        'street',        'text',  @client.street],
-      ['Street 2',      'street2',       'text',  @client.street2],
-      ['City',          'city',          'text',  @client.city],
-      ['State',         'state',         'text',  @client.state],
-      ['ZIP',           'zip',           'text',  @client.zip],
+      ['Client Name',   'name',          'text',  @client&.name],
+      ['Client Prefix', 'client_prefix', 'text',  @client&.prefix],
+      ['Contact',       'contact',       'text',  @client&.contact],
+      ['Email',         'email',         'email', @client&.email],
+      ['Street',        'street',        'text',  @client&.street],
+      ['Street 2',      'street2',       'text',  @client&.street2],
+      ['City',          'city',          'text',  @client&.city],
+      ['State',         'state',         'text',  @client&.state],
+      ['ZIP',           'zip',           'text',  @client&.zip],
     ].each do |label, field, type, val| %>
       <div class="px-5 py-4 flex items-center gap-4">
         <label class="w-32 text-xs font-medium text-gray-500 uppercase tracking-wider flex-shrink-0"><%= label %></label>
         <input type="<%= type %>" name="client[<%= field %>]" value="<%= val %>"
           class="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
+      </div>
+    <% end %>
+    <% if content_for?(:extra_fields) %>
+      <div class="px-5 py-4">
+        <%== yield_content :extra_fields %>
       </div>
     <% end %>
     <div class="px-5 py-4">
