@@ -65,7 +65,7 @@
 
 <div class="toolbar">
   <div class="toolbar-inner">
-    <a href="/invoices/view/<%= @invoice.id %>" class="btn btn-back">&larr; Back</a>
+    <a href="/invoices/<%= @invoice.client.client_key %>/<%= @invoice.client.client_prefix %>-<%= @invoice.num %>" class="btn btn-back">&larr; Back</a>
     <button onclick="window.print()" class="btn btn-print">Print / Save as PDF</button>
   </div>
 </div>

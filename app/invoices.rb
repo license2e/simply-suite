@@ -83,15 +83,18 @@ class Invoices < SimplyBase
     redirect url("/edit/#{@invoice.id}")
   end
 
-  get '/view/:id' do
-    @invoice = Invoice[params[:id].to_i]
+  get '/:client_key/:invoice_number' do
+    @client = Client.first(client_key: params[:client_key])
+    halt 404 unless @client
+    num = params[:invoice_number].delete_prefix("#{@client.client_prefix}-")
+    @invoice = Invoice.first(client_id: @client.id, num: num)
     halt 404 unless @invoice
     @company = Company.first
     @logopath = '/css/images/logo.png'
     pdf_paths = get_invoice_pdf_path(settings.public_folder, @invoice)
     @pdf_invoice_path = File.exist?(pdf_paths[:local]) ? pdf_paths[:web] : nil
     @smtp_configured = smtp_configured?
-    @page_title = "Invoice #{@invoice.num} — #{@invoice.client.name}"
+    @page_title = "Invoice #{@client.client_prefix}-#{@invoice.num} — #{@client.name}"
     v :'invoices/view'
   end
 
@@ -108,23 +111,23 @@ class Invoices < SimplyBase
     halt 404 unless @invoice
     @invoice.update(approved_on: Time.now) if @invoice.approved_on.nil?
     flash[:success] = "Invoice approved!"
-    redirect url("/view/#{@invoice.id}")
+    redirect invoice_view_url(@invoice)
   end
 
   get '/send/:id' do
-    unless smtp_configured?
-      flash[:error] = "SMTP is not configured — cannot send email"
-      redirect url("/view/#{params[:id]}")
-    end
     @invoice = Invoice[params[:id].to_i]
     halt 404 unless @invoice
+    unless smtp_configured?
+      flash[:error] = "SMTP is not configured — cannot send email"
+      redirect invoice_view_url(@invoice)
+    end
     html_body = erb :'invoices/html_email', layout: false
     text_body = erb :'invoices/text_email', layout: false
     pdf_paths = get_invoice_pdf_path(settings.public_folder, @invoice)
     Mailer.invoice(@invoice, html_body: html_body, text_body: text_body, pdf_path: pdf_paths[:local])
     @invoice.update(sent_at: Time.now) if @invoice.sent_at.nil?
     flash[:success] = "Invoice sent successfully!"
-    redirect url("/view/#{@invoice.id}")
+    redirect invoice_view_url(@invoice)
   end
 
   get '/mark_sent/:id' do
@@ -132,7 +135,7 @@ class Invoices < SimplyBase
     halt 404 unless @invoice
     @invoice.update(sent_at: Time.now) if @invoice.sent_at.nil?
     flash[:success] = "Invoice marked as sent!"
-    redirect url("/view/#{@invoice.id}")
+    redirect invoice_view_url(@invoice)
   end
 
   get '/paid/:id' do
@@ -140,10 +143,14 @@ class Invoices < SimplyBase
     halt 404 unless @invoice
     @invoice.update(paid_at: Time.now) if @invoice.paid_at.nil?
     flash[:success] = "Invoice marked as paid!"
-    redirect url("/view/#{@invoice.id}")
+    redirect invoice_view_url(@invoice)
   end
 
   helpers do
+    def invoice_view_url(invoice)
+      url("/#{invoice.client.client_key}/#{invoice.client.client_prefix}-#{invoice.num}")
+    end
+
     def process_invoice_services(invoice_data, invoice)
       return unless invoice_data[:services]
       invoice_data[:services].each do |_key, s|
