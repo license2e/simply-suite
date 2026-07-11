@@ -9,6 +9,7 @@ class Client < Sequel::Model
   plugin :timestamps, update_on_create: true
   plugin :validation_helpers
 
+  set_dataset(DB[:clients].where(deleted_at: nil))
   one_to_many :invoices
 
   def validate
@@ -22,6 +23,13 @@ class Client < Sequel::Model
     existing = self.class.first(client_key: slug)
     self.client_key = existing ? "#{slug}-#{rand(100)}" : slug
   end
+
+  def soft_delete
+    DB.transaction do
+      invoices.each(&:soft_delete)
+      update(deleted_at: Time.now)
+    end
+  end
 end
 
 class Invoice < Sequel::Model
@@ -29,8 +37,17 @@ class Invoice < Sequel::Model
   plugin :timestamps, update_on_create: true
   plugin :validation_helpers
 
+  set_dataset(DB[:invoices].where(deleted_at: nil))
   many_to_one :client
   one_to_many :services
+
+  def deletable?
+    approved_on.nil?
+  end
+
+  def soft_delete
+    update(deleted_at: Time.now)
+  end
 
   def formatted_invoice_num(client_obj)
     if num && !num.empty?

@@ -29,6 +29,9 @@
               <a href="/invoices/<%= client.client_key %>" class="text-xs text-slate-600 hover:text-slate-900 font-medium">Invoices</a>
               <a href="/clients/view/<%= client.client_key %>" class="text-xs text-slate-600 hover:text-slate-900 font-medium">View</a>
               <a href="/clients/edit/<%= client.client_key %>" class="text-xs text-slate-600 hover:text-slate-900 font-medium">Edit</a>
+              <a href="/clients/delete/<%= client.client_key %>"
+                onclick="return confirm('Delete <%= client.name %> and ALL their invoices? This cannot be undone.')"
+                class="text-xs text-red-400 hover:text-red-600 font-medium">Delete</a>
             </td>
           </tr>
         <% end %>

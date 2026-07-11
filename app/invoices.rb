@@ -109,6 +109,16 @@ class Invoices < SimplyBase
     erb :'invoices/preview', layout: false
   end
 
+  get '/delete/:id' do
+    @invoice = Invoice[params[:id].to_i]
+    halt 404 unless @invoice
+    halt 403 unless @invoice.deletable?
+    client_key = @invoice.client.client_key
+    @invoice.soft_delete
+    flash[:success] = "Invoice deleted."
+    redirect url("/#{client_key}")
+  end
+
   get '/approve/:id' do
     @invoice = Invoice[params[:id].to_i]
     halt 404 unless @invoice

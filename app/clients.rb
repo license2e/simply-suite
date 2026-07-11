@@ -52,6 +52,14 @@ class Clients < SimplyBase
     redirect url('/')
   end
 
+  get '/delete/:client_key' do
+    @client = Client.first(client_key: params[:client_key])
+    halt 404 unless @client
+    @client.soft_delete
+    flash[:success] = "#{@client.name} and all their invoices have been deleted."
+    redirect url('/')
+  end
+
   get '/create' do
     @client = Client.new
     @action_url = url('/create')
