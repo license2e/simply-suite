@@ -35,84 +35,83 @@ inv_num    = inv_parts[1] || '001'
 
 # ── Company ──────────────────────────────────────────────────────────────────
 puts "\n── Company"
-if Company.count > 0
-  puts "   Skipping — company already exists (#{Company.first.name})"
-  puts "   Run seeds.rb or update manually to change it."
+csz = parse_city_state_zip(from[:city_state_zip].to_s)
+company_attrs = {
+  name:    from[:company],
+  contact: from[:contact],
+  email:   from[:email],
+  street:  from[:address],
+  city:    csz[:city],
+  state:   csz[:state],
+  zip:     csz[:zip]
+}
+if (company = Company.first)
+  company.update(company_attrs)
+  puts "   Updated: #{company.name}"
 else
-  csz = parse_city_state_zip(from[:city_state_zip].to_s)
-  company = Company.create(
-    name:    from[:company],
-    contact: from[:contact],
-    email:   from[:email],
-    street:  from[:address],
-    city:    csz[:city],
-    state:   csz[:state],
-    zip:     csz[:zip]
-  )
+  company = Company.create(company_attrs)
   puts "   Created: #{company.name}"
 end
 
 # ── Client ───────────────────────────────────────────────────────────────────
 puts "\n── Client"
-existing = Client.first(client_key: bill_to[:name].to_s.downcase.gsub(/[^\w\s-]/, '').gsub(/[\s_]+/, '-').gsub(/-+/, '-').gsub(/\A-|-\z/, ''))
-if existing
-  puts "   Skipping — client '#{existing.name}' already exists (#{existing.client_key})"
-  client = existing
+slug = bill_to[:name].to_s.downcase.gsub(/[^\w\s-]/, '').gsub(/[\s_]+/, '-').gsub(/-+/, '-').gsub(/\A-|-\z/, '')
+client_attrs = {
+  client_prefix: inv_prefix,
+  contact:       bill_to[:contact],
+  email:         bill_to[:email],
+  street:        bill_to[:street],
+  street2:       bill_to[:street2].to_s,
+  city:          bill_to[:city],
+  state:         bill_to[:state],
+  zip:           bill_to[:zip].to_s
+}
+if (client = Client.first(client_key: slug))
+  client.update(client_attrs.merge(name: bill_to[:name]))
+  puts "   Updated: #{client.name} (#{client.client_key})"
 else
   client = Client.new
-  client.title         = bill_to[:name]
-  client.client_prefix = inv_prefix
-  client.contact       = bill_to[:contact]
-  client.email         = bill_to[:email]
-  client.street        = bill_to[:street]
-  client.street2       = bill_to[:street2].to_s
-  client.city          = bill_to[:city]
-  client.state         = bill_to[:state]
-  client.zip           = bill_to[:zip].to_s
+  client.title = bill_to[:name]
+  client_attrs.each { |k, v| client.send(:"#{k}=", v) }
   client.save
   puts "   Created: #{client.name} (#{client.client_key}, prefix: #{client.client_prefix})"
 end
 
 # ── Invoice ───────────────────────────────────────────────────────────────────
 puts "\n── Invoice"
-existing_inv = Invoice.first(client_id: client.id, num: inv_num)
-if existing_inv
-  puts "   Skipping — invoice #{client.client_prefix}-#{inv_num} already exists"
-  invoice = existing_inv
-else
-  total    = services.sum { |s| s[:qty].to_f * s[:unit_cost].to_f }
-  discount = total * (data[:discount_percentage].to_f / 100.0)
-  inv_date = (Date.parse(inv[:date].to_s) rescue Date.today)
+total    = services.sum { |s| s[:qty].to_f * s[:unit_cost].to_f }
+discount = total * (data[:discount_percentage].to_f / 100.0)
+inv_date = (Date.parse(inv[:date].to_s) rescue Date.today)
 
-  invoice = Invoice.create(
-    client_id:      client.id,
-    num:            inv_num,
-    invoice_date:   inv_date,
-    total_amount:   total,
-    total_discount: discount,
-    amount_paid:    data[:amount_paid].to_f,
-    terms:          inv[:terms],
-    notes:          inv[:notes],
-    is_complete:    true
-  )
+invoice_attrs = {
+  invoice_date:   inv_date,
+  total_amount:   total,
+  total_discount: discount,
+  amount_paid:    data[:amount_paid].to_f,
+  terms:          inv[:terms],
+  notes:          inv[:notes],
+  is_complete:    true
+}
+if (invoice = Invoice.first(client_id: client.id, num: inv_num))
+  invoice.update(invoice_attrs)
+  puts "   Updated: #{client.client_prefix}-#{invoice.num} — $#{'%.2f' % total}"
+else
+  invoice = Invoice.create(invoice_attrs.merge(client_id: client.id, num: inv_num))
   puts "   Created: #{client.client_prefix}-#{invoice.num} — $#{'%.2f' % total}"
 end
 
 # ── Services ──────────────────────────────────────────────────────────────────
 puts "\n── Services"
-if invoice.services.any?
-  puts "   Skipping — invoice already has #{invoice.services.count} service(s)"
-else
-  services.each do |s|
-    Service.create(
-      invoice_id: invoice.id,
-      item:       s[:item],
-      desc:       s[:description],
-      qty:        s[:qty].to_i,
-      cost:       s[:unit_cost].to_f
-    )
-    puts "   #{s[:item]}: #{s[:qty]} x $#{'%.2f' % s[:unit_cost]}"
-  end
+invoice.services.each(&:destroy)
+services.each do |s|
+  Service.create(
+    invoice_id: invoice.id,
+    item:       s[:item],
+    desc:       s[:description],
+    qty:        s[:qty].to_i,
+    cost:       s[:unit_cost].to_f
+  )
+  puts "   #{s[:item]}: #{s[:qty]} x $#{'%.2f' % s[:unit_cost]}"
 end
 
 puts "\n✓ Done"
