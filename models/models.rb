@@ -143,6 +143,26 @@ class Service < Sequel::Model
   end
 end
 
+class Timesheet < Sequel::Model
+  include Formattable
+  plugin :timestamps, update_on_create: true
+
+  many_to_one :client
+  many_to_one :invoice
+
+  def formatted_service_date
+    service_date ? service_date.strftime("%m/%d/%Y") : ""
+  end
+
+  def formatted_cost
+    cost ? format_number(cost, 2) : ""
+  end
+
+  def formatted_line_total
+    (cost && qty) ? format_number(qty.to_f * cost.to_f, 2) : ""
+  end
+end
+
 class Company < Sequel::Model
   plugin :timestamps, update_on_create: true
   plugin :validation_helpers

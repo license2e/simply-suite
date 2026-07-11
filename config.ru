@@ -54,3 +54,8 @@ map '/settings' do
   require 'settings'
   run Settings
 end
+
+map '/timesheets' do
+  require 'timesheets'
+  run Timesheets
+end

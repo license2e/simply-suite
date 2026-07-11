@@ -20,6 +20,9 @@
       <a href="/clients" class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">
         Clients
       </a>
+      <a href="/timesheets" class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">
+        Timesheets
+      </a>
     </nav>
     <div class="px-3 py-3">
       <a href="/settings" class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">
@@ -114,6 +117,50 @@
     }
 
     app.register('invoice-form', InvoiceFormController);
+
+    class TimesheetController extends Controller {
+      static targets = ['body', 'rowTemplate', 'form']
+
+      connect() {
+        this.rowIndex = this.bodyTarget.querySelectorAll('[data-ts-row]').length;
+        this.updateAllTotals();
+      }
+
+      addRow(event) {
+        event.preventDefault();
+        const html = this.rowTemplateTarget.innerHTML.replace(/ROW_INDEX/g, this.rowIndex++);
+        this.bodyTarget.insertAdjacentHTML('beforeend', html);
+      }
+
+      removeRow(event) {
+        event.preventDefault();
+        const row = event.target.closest('[data-ts-row]');
+        const deleteInput = row.querySelector('[data-ts-delete]');
+        if (deleteInput && deleteInput.value) {
+          deleteInput.disabled = false;
+          this.formTarget.appendChild(deleteInput);
+        }
+        row.remove();
+      }
+
+      updateTotal(event) {
+        const row = event.target.closest('[data-ts-row]');
+        this._calcRowTotal(row);
+      }
+
+      updateAllTotals() {
+        this.bodyTarget.querySelectorAll('[data-ts-row]').forEach(row => this._calcRowTotal(row));
+      }
+
+      _calcRowTotal(row) {
+        const qty  = parseFloat(row.querySelector('[data-ts-qty]')?.value) || 0;
+        const cost = parseFloat(row.querySelector('[data-ts-cost]')?.value) || 0;
+        const cell = row.querySelector('[data-ts-total]');
+        if (cell) cell.textContent = qty && cost ? '$' + (qty * cost).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '—';
+      }
+    }
+
+    app.register('timesheet', TimesheetController);
   </script>
 </body>
 </html>
