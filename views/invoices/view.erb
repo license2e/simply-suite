@@ -14,12 +14,12 @@
     <% if @invoice.approved_on.nil? %>
       <button onclick="openPreviewModal(this.dataset.modalUrl)"
         data-modal-url="/invoices/<%= @invoice.client.client_key %>/<%= @invoice.client.client_prefix %>-<%= @invoice.num %>/preview"
-        class="px-3 py-1.5 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 text-xs font-medium rounded-md">Preview</button>
+        class="px-3 py-1.5 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 text-xs font-medium rounded-md cursor-pointer">Preview</button>
     <% else %>
       <% unless @pdf_invoice_path.nil? %>
         <button onclick="openPreviewModal(this.dataset.modalUrl)"
           data-modal-url="<%= @pdf_invoice_path %>"
-          class="px-3 py-1.5 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 text-xs font-medium rounded-md">PDF</button>
+          class="px-3 py-1.5 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 text-xs font-medium rounded-md cursor-pointer">PDF</button>
       <% end %>
     <% end %>
     <% if !@invoice.approved_on.nil? && @invoice.sent_at.nil? %>
