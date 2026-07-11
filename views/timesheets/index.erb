@@ -14,20 +14,19 @@
         </thead>
         <tbody class="divide-y divide-gray-100">
           <% @clients.each do |client| %>
-            <% entries = Timesheet.where(client_id: client.id).all %>
-            <% uninvoiced = entries.count { |e| !e.invoiced } %>
+            <% summary = @summaries[client.slug] %>
             <tr class="hover:bg-gray-50">
               <td class="px-4 py-3 font-medium text-gray-900"><%= client.name %></td>
-              <td class="px-4 py-3 text-right text-gray-500"><%= entries.count %></td>
+              <td class="px-4 py-3 text-right text-gray-500"><%= summary[:total] %></td>
               <td class="px-4 py-3 text-right">
-                <% if uninvoiced > 0 %>
-                  <span class="px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800"><%= uninvoiced %></span>
+                <% if summary[:uninvoiced] > 0 %>
+                  <span class="px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800"><%= summary[:uninvoiced] %></span>
                 <% else %>
                   <span class="text-gray-400">—</span>
                 <% end %>
               </td>
               <td class="px-4 py-3 text-right">
-                <a href="/timesheets/<%= client.client_key %>" class="text-xs text-slate-600 hover:text-slate-900 font-medium">Open</a>
+                <a href="/timesheets/<%= client.slug %>" class="text-xs text-slate-600 hover:text-slate-900 font-medium">Open</a>
               </td>
             </tr>
           <% end %>

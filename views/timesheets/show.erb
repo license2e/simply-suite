@@ -2,11 +2,23 @@
 
   <div class="flex items-center justify-between">
     <a href="/timesheets" class="text-sm text-slate-600 hover:text-slate-900">&larr; All Clients</a>
-    <a href="/invoices/<%= @client.client_key %>"
+    <a href="/invoices/<%= @client.slug %>"
       class="text-sm text-slate-600 hover:text-slate-900">Invoices &rarr;</a>
   </div>
 
-  <form action="/timesheets/<%= @client.client_key %>" method="post" data-timesheet-target="form">
+  <div class="flex items-center justify-between mb-4">
+    <a href="/timesheets/<%= @client.slug %>?period=<%= @period.prev_key %>" class="text-sm text-slate-600 hover:text-slate-900">&lsaquo; Prev</a>
+    <span class="font-medium"><%= @period.key %></span>
+    <a href="/timesheets/<%= @client.slug %>?period=<%= @period.next_key %>" class="text-sm text-slate-600 hover:text-slate-900">Next &rsaquo;</a>
+  </div>
+
+  <% if @entries.any? { |e| !e[:invoiced] } %>
+    <form method="post" action="/timesheets/<%= @client.slug %>/invoice?period=<%= @period.key %>" class="mb-4">
+      <button class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors cursor-pointer" type="submit">Create invoice from this period</button>
+    </form>
+  <% end %>
+
+  <form action="/timesheets/<%= @client.slug %>?period=<%= @period.key %>" method="post" data-timesheet-target="form">
     <div class="bg-white rounded-xl border border-gray-200 overflow-x-auto">
       <table class="w-full text-sm min-w-[700px]">
         <thead class="bg-gray-50 border-b border-gray-200">
@@ -22,70 +34,9 @@
           </tr>
         </thead>
         <tbody data-timesheet-target="body">
-
-          <%# Invoiced rows — read-only, greyed out %>
-          <% @entries.select(&:invoiced).each do |e| %>
-            <tr class="bg-gray-50 opacity-50">
-              <td class="px-3 py-2 text-gray-500 whitespace-nowrap"><%= e.formatted_service_date %></td>
-              <td class="px-3 py-2 text-gray-500"><%= e.item %></td>
-              <td class="px-3 py-2 text-gray-400"><%= e.desc %></td>
-              <td class="px-3 py-2 text-gray-500"><%= e.qty %></td>
-              <td class="px-3 py-2 text-gray-500">$<%= e.formatted_cost %></td>
-              <td class="px-3 py-2 text-right text-gray-500">$<%= e.formatted_line_total %></td>
-              <td class="px-3 py-2 text-center">
-                <span class="px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">Yes</span>
-              </td>
-              <td></td>
-            </tr>
+          <% @entries.each_with_index do |e, i| %>
+            <%== erb :'timesheets/_row', { layout: false }, { entry: e, index: i } %>
           <% end %>
-
-          <%# Editable rows %>
-          <% @entries.reject(&:invoiced).each_with_index do |e, i| %>
-            <tr data-ts-row class="hover:bg-gray-50">
-              <input type="hidden" name="entries[<%= i %>][id]" value="<%= e.id %>">
-              <td class="px-2 py-1.5">
-                <input type="text" name="entries[<%= i %>][service_date]" value="<%= e.formatted_service_date %>"
-                  placeholder="MM/DD/YYYY"
-                  class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-slate-500">
-              </td>
-              <td class="px-2 py-1.5">
-                <input type="text" name="entries[<%= i %>][item]" value="<%= e.item %>"
-                  placeholder="Item"
-                  class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-slate-500">
-              </td>
-              <td class="px-2 py-1.5">
-                <input type="text" name="entries[<%= i %>][desc]" value="<%= e.desc %>"
-                  placeholder="Description"
-                  class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-slate-500">
-              </td>
-              <td class="px-2 py-1.5">
-                <input type="number" name="entries[<%= i %>][qty]" value="<%= e.qty %>" step="0.5" min="0"
-                  placeholder="0"
-                  data-action="input->timesheet#updateTotal"
-                  data-ts-qty
-                  class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-slate-500">
-              </td>
-              <td class="px-2 py-1.5">
-                <input type="text" name="entries[<%= i %>][cost]" value="<%= e.formatted_cost %>"
-                  placeholder="0.00"
-                  data-action="input->timesheet#updateTotal"
-                  data-ts-cost
-                  class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-slate-500">
-              </td>
-              <td class="px-2 py-1.5 text-right text-sm text-gray-700 font-medium" data-ts-total>
-                $<%= e.formatted_line_total %>
-              </td>
-              <td class="px-2 py-1.5 text-center">
-                <span class="px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">No</span>
-              </td>
-              <td class="px-2 py-1.5 text-center">
-                <input type="hidden" name="delete_entries[]" value="<%= e.id %>" disabled data-ts-delete>
-                <button type="button" data-action="timesheet#removeRow"
-                  class="h-8 min-w-[2rem] text-gray-400 hover:text-red-500 text-xs transition-colors cursor-pointer">&times;</button>
-              </td>
-            </tr>
-          <% end %>
-
         </tbody>
       </table>
     </div>
@@ -104,7 +55,7 @@
 
   <!-- New row template -->
   <template data-timesheet-target="rowTemplate">
-    <%== erb :'timesheets/_row' %>
+    <%== erb :'timesheets/_row', { layout: false }, { entry: nil, index: 'ROW_INDEX' } %>
   </template>
 
 </div>

@@ -1,50 +1,71 @@
 class Timesheets < SimplyBase
   set :layout_default, :'admin/layout-default'
 
-  before { authorize! }
+  before { require_business! }
+
+  helpers do
+    def parse_rows(entries)
+      (entries || {}).values.map do |e|
+        { id: e[:id], item: e[:item], desc: e[:desc],
+          service_date: e[:service_date].to_s.empty? ? nil : (Date.strptime(e[:service_date], '%m/%d/%Y') rescue nil),
+          qty: e[:qty], cost: e[:cost] }
+      end
+    end
+
+    def fmt_date(v)
+      return '' if v.to_s.empty?
+      Date.parse(v.to_s).strftime('%m/%d/%Y')
+    rescue ArgumentError
+      ''
+    end
+
+    def fmt_money(v)
+      return '' if v.nil? || v.to_s.empty?
+      format('%.2f', v.to_f).gsub(/(\d)(?=(\d\d\d)+(?!\d))/, '\1,')
+    end
+
+    def fmt_line_total(entry)
+      return '—' if entry[:qty].to_s.empty? || entry[:cost].to_s.empty?
+      fmt_money(entry[:qty].to_f * entry[:cost].to_f)
+    end
+  end
 
   get '/' do
-    @clients = Client.order(:name).all
+    @clients = current_business.clients
+    @summaries = @clients.to_h { |c| [c.slug, c.timesheet_summary] }
     @page_title = 'Timesheets'
     v :'timesheets/index'
   end
 
   get '/:client_key' do
-    @client = Client.first(client_key: params[:client_key])
+    @client = current_business.find_client(params[:client_key])
     halt 404 unless @client
-    @entries = Timesheet.where(client_id: @client.id).order(:service_date, :id).all
+    @period = @client.timesheet_period(params[:period])
+    @entries = @period.entries
     @page_title = "Timesheets — #{@client.name}"
     v :'timesheets/show'
   end
 
   post '/:client_key' do
-    @client = Client.first(client_key: params[:client_key])
-    halt 404 unless @client
+    client = current_business.find_client(params[:client_key])
+    halt 404 unless client
+    period = client.timesheet_period(params[:period])
+    period.apply(rows: parse_rows(params[:entries]), deletes: params[:delete_entries] || [])
+    flash[:success] = 'Timesheet saved.'
+    redirect "/timesheets/#{client.slug}?period=#{period.key}"
+  end
 
-    (params[:entries] || {}).each do |_key, e|
-      next if e[:item].to_s.empty? && e[:desc].to_s.empty?
-      svc_date = e[:service_date].to_s.empty? ? nil : (DateTime.strptime(e[:service_date], "%m/%d/%Y") rescue nil)
-      attrs = {
-        item:         e[:item].to_s.empty? ? nil : e[:item],
-        desc:         e[:desc].to_s.empty? ? nil : e[:desc],
-        service_date: svc_date,
-        qty:          e[:qty].to_s.empty? ? nil : e[:qty].to_f,
-        cost:         e[:cost].to_s.empty? ? nil : e[:cost].to_f
-      }
-      if e[:id] && !e[:id].empty?
-        entry = Timesheet.first(id: e[:id].to_i, client_id: @client.id)
-        entry.update(attrs) if entry && !entry.invoiced
-      else
-        Timesheet.create(attrs.merge(client_id: @client.id, invoiced: false))
-      end
+  post '/:client_key/invoice' do
+    client = current_business.find_client(params[:client_key])
+    halt 404 unless client
+    period = client.timesheet_period(params[:period])
+    invoice = period.create_invoice
+    if invoice
+      flash[:success] = "Draft invoice #{client.prefix}-#{invoice.num} created."
+      redirect "/invoices/#{client.slug}/#{invoice.num}/edit"
+    else
+      flash[:error] = 'No un-invoiced entries in this period.'
+      redirect "/timesheets/#{client.slug}?period=#{period.key}"
     end
-
-    (params[:delete_entries] || []).each do |id|
-      entry = Timesheet.first(id: id.to_i, client_id: @client.id)
-      entry.destroy if entry && !entry.invoiced
-    end
-
-    flash[:success] = "Timesheet saved."
-    redirect url("/#{@client.client_key}")
   end
 end
