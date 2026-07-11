@@ -83,33 +83,6 @@ class Invoices < SimplyBase
     redirect url("/edit/#{@invoice.id}")
   end
 
-  get '/:client_key/:invoice_number' do
-    @client = Client.first(client_key: params[:client_key])
-    halt 404 unless @client
-    num = params[:invoice_number].delete_prefix("#{@client.client_prefix}-")
-    @invoice = Invoice.first(client_id: @client.id, num: num)
-    halt 404 unless @invoice
-    @company = Company.first
-    @logopath = '/css/images/logo.png'
-    pdf_paths = get_invoice_pdf_path(settings.public_folder, @invoice)
-    @pdf_invoice_path = File.exist?(pdf_paths[:local]) ? pdf_paths[:web] : nil
-    @smtp_configured = smtp_configured?
-    @page_title = "Invoice #{@client.client_prefix}-#{@invoice.num} — #{@client.name}"
-    v :'invoices/view'
-  end
-
-  get '/:client_key/:invoice_number/preview' do
-    @client = Client.first(client_key: params[:client_key])
-    halt 404 unless @client
-    num = params[:invoice_number].delete_prefix("#{@client.client_prefix}-")
-    @invoice = Invoice.first(client_id: @client.id, num: num)
-    halt 404 unless @invoice
-    @company = Company.first
-    logo_local = File.join(settings.public_folder, 'css/images/logo.png')
-    @logo_url = File.exist?(logo_local) ? "/css/images/logo.png?v=#{File.mtime(logo_local).to_i}" : nil
-    erb :'invoices/preview', layout: false
-  end
-
   get '/delete/:id' do
     @invoice = Invoice[params[:id].to_i]
     halt 404 unless @invoice
@@ -158,6 +131,34 @@ class Invoices < SimplyBase
     @invoice.update(paid_at: Time.now) if @invoice.paid_at.nil?
     flash[:success] = "Invoice marked as paid!"
     redirect invoice_view_url(@invoice)
+  end
+
+  # Wildcard routes last — must come after all specific action routes
+  get '/:client_key/:invoice_number' do
+    @client = Client.first(client_key: params[:client_key])
+    halt 404 unless @client
+    num = params[:invoice_number].delete_prefix("#{@client.client_prefix}-")
+    @invoice = Invoice.first(client_id: @client.id, num: num)
+    halt 404 unless @invoice
+    @company = Company.first
+    @logopath = '/css/images/logo.png'
+    pdf_paths = get_invoice_pdf_path(settings.public_folder, @invoice)
+    @pdf_invoice_path = File.exist?(pdf_paths[:local]) ? pdf_paths[:web] : nil
+    @smtp_configured = smtp_configured?
+    @page_title = "Invoice #{@client.client_prefix}-#{@invoice.num} — #{@client.name}"
+    v :'invoices/view'
+  end
+
+  get '/:client_key/:invoice_number/preview' do
+    @client = Client.first(client_key: params[:client_key])
+    halt 404 unless @client
+    num = params[:invoice_number].delete_prefix("#{@client.client_prefix}-")
+    @invoice = Invoice.first(client_id: @client.id, num: num)
+    halt 404 unless @invoice
+    @company = Company.first
+    logo_local = File.join(settings.public_folder, 'css/images/logo.png')
+    @logo_url = File.exist?(logo_local) ? "/css/images/logo.png?v=#{File.mtime(logo_local).to_i}" : nil
+    erb :'invoices/preview', layout: false
   end
 
   helpers do
