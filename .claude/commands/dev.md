@@ -1,6 +1,10 @@
-Start the Simply Suite web server and Tailwind CSS watcher in the background.
+Start or stop the Simply Suite web server and Tailwind CSS watcher.
 
-Steps:
+If the argument is "stop":
+1. Run `fuser -k 9393/tcp 2>/dev/null; kill $(ps aux | grep "rerun" | grep -v grep | awk '{print $2}') 2>/dev/null` — ignore errors if nothing is running
+2. Tell the user the server has been stopped
+
+Otherwise (no argument or any other argument), start the server:
 1. Kill any process already on port 9393: run `fuser -k 9393/tcp 2>/dev/null; sleep 1` from the project root
 2. Kill any lingering rerun processes: run `kill $(ps aux | grep "rerun" | grep -v grep | awk '{print $2}') 2>/dev/null; sleep 1` — ignore errors if none are running
 3. Run `bundle exec rerun --no-notify -- bundle exec puma -p 9393 2>&1 | grep -v "stty:"` with run_in_background=true from the project root (/home/doublenot/sites/doublenot/simply-suite)
