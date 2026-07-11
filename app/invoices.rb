@@ -89,10 +89,18 @@ class Invoices < SimplyBase
     @company = Company.first
     @logopath = '/css/images/logo.png'
     pdf_paths = get_invoice_pdf_path(settings.public_folder, @invoice)
-    @pdf_invoice_path = pdf_paths[:web]
+    @pdf_invoice_path = File.exist?(pdf_paths[:local]) ? pdf_paths[:web] : nil
     @smtp_configured = smtp_configured?
     @page_title = "Invoice #{@invoice.num} — #{@invoice.client.name}"
     v :'invoices/view'
+  end
+
+  get '/preview/:id' do
+    @invoice = Invoice[params[:id].to_i]
+    halt 404 unless @invoice
+    halt 403 unless @invoice.approved_on
+    @company = Company.first
+    erb :'invoices/preview', layout: false
   end
 
   get '/approve/:id' do

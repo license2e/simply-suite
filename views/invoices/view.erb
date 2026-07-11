@@ -11,6 +11,14 @@
       <a href="/invoices/approve/<%= @invoice.id %>"
         class="px-3 py-1.5 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 text-xs font-medium rounded-md">Approve</a>
     <% end %>
+    <% if !@invoice.approved_on.nil? %>
+      <a href="/invoices/preview/<%= @invoice.id %>" target="_blank"
+        class="px-3 py-1.5 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 text-xs font-medium rounded-md">Preview</a>
+      <% unless @pdf_invoice_path.nil? %>
+        <a href="<%= @pdf_invoice_path %>" target="_blank"
+          class="px-3 py-1.5 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 text-xs font-medium rounded-md">PDF</a>
+      <% end %>
+    <% end %>
     <% if !@invoice.approved_on.nil? && @invoice.sent_at.nil? %>
       <% if @smtp_configured %>
         <a href="/invoices/send/<%= @invoice.id %>"
@@ -22,10 +30,6 @@
     <% if @invoice.paid_at.nil? && !@invoice.approved_on.nil? %>
       <a href="/invoices/paid/<%= @invoice.id %>"
         class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md">Mark Paid</a>
-    <% end %>
-    <% unless @pdf_invoice_path.nil? %>
-      <a href="<%= @pdf_invoice_path %>" target="_blank"
-        class="px-3 py-1.5 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 text-xs font-medium rounded-md">PDF</a>
     <% end %>
   </div>
 
