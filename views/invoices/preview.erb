@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Invoice <%= @invoice.client.client_prefix %>-<%= @invoice.num %></title>
+  <title>Invoice <%= @invoice.client.prefix %>-<%= @invoice.num %></title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 13px; color: #333; background: #eee; }
@@ -70,7 +70,7 @@
         <img src="<%= @logo_url %>" alt="" style="max-width:160px;max-height:64px;object-fit:contain;display:block;margin-left:auto;margin-bottom:16px;">
       <% end %>
       <p class="invoice-title">INVOICE</p>
-      <p class="meta-row"><strong><%= @invoice.client.client_prefix %>-<%= @invoice.num %></strong></p>
+      <p class="meta-row"><strong><%= @invoice.client.prefix %>-<%= @invoice.num %></strong></p>
       <p class="meta-row"><%= @invoice.formatted_invoice_date %></p>
       <div class="balance-box">
         <p class="balance-label">Balance Due</p>

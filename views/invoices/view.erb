@@ -1,19 +1,19 @@
 <div class="max-w-3xl space-y-5">
   <!-- Actions -->
   <div class="flex flex-wrap gap-2">
-    <a href="/invoices/<%= @invoice.client.client_key %>"
+    <a href="/invoices/<%= @client.slug %>"
       class="px-3 py-2 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 text-xs font-medium rounded-md">&larr; Back</a>
     <% if @invoice.editable? %>
-      <a href="/invoices/edit/<%= @invoice.id %>"
+      <a href="/invoices/<%= @client.slug %>/<%= @invoice.num %>/edit"
         class="px-3 py-2 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 text-xs font-medium rounded-md">Edit</a>
     <% end %>
     <% if @invoice.approved_on.nil? %>
-      <a href="/invoices/approve/<%= @invoice.id %>"
+      <a href="/invoices/<%= @client.slug %>/<%= @invoice.num %>/approve"
         class="px-3 py-2 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 text-xs font-medium rounded-md">Approve</a>
     <% end %>
     <% if @invoice.approved_on.nil? %>
       <button onclick="openPreviewModal(this.dataset.modalUrl)"
-        data-modal-url="/invoices/<%= @invoice.client.client_key %>/<%= @invoice.client.client_prefix %>-<%= @invoice.num %>/preview"
+        data-modal-url="/invoices/<%= @client.slug %>/<%= @invoice.num %>/preview"
         class="px-3 py-2 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 text-xs font-medium rounded-md cursor-pointer">Preview</button>
     <% else %>
       <% unless @pdf_invoice_path.nil? %>
@@ -23,20 +23,16 @@
       <% end %>
     <% end %>
     <% if !@invoice.approved_on.nil? && @invoice.sent_at.nil? %>
-      <% if @smtp_configured %>
-        <a href="/invoices/send/<%= @invoice.id %>"
-          class="px-3 py-2 bg-slate-700 hover:bg-slate-800 text-white text-xs font-medium rounded-md">Send</a>
-      <% end %>
-      <a href="/invoices/mark_sent/<%= @invoice.id %>"
+      <a href="/invoices/<%= @client.slug %>/<%= @invoice.num %>/mark_sent"
         class="px-3 py-2 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 text-xs font-medium rounded-md">Mark as Sent</a>
     <% end %>
     <% if @invoice.paid_at.nil? && !@invoice.approved_on.nil? %>
-      <a href="/invoices/paid/<%= @invoice.id %>"
+      <a href="/invoices/<%= @client.slug %>/<%= @invoice.num %>/paid"
         class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md">Mark Paid</a>
     <% end %>
     <% if @invoice.deletable? %>
-      <a href="/invoices/delete/<%= @invoice.id %>"
-        onclick="return confirm('Delete invoice <%= @invoice.client.client_prefix %>-<%= @invoice.num %>? This cannot be undone.')"
+      <a href="/invoices/<%= @client.slug %>/<%= @invoice.num %>/delete"
+        onclick="return confirm('Delete invoice <%= @client.prefix %>-<%= @invoice.num %>? This cannot be undone.')"
         class="px-3 py-2 bg-white border border-red-300 hover:border-red-400 text-red-600 text-xs font-medium rounded-md">Delete</a>
     <% end %>
   </div>
@@ -70,7 +66,7 @@
     <div class="px-5 py-4 flex items-center justify-between">
       <div>
         <p class="text-xs text-gray-500">Invoice</p>
-        <p class="text-lg font-semibold"><%= @invoice.client.client_prefix %>-<%= @invoice.num %></p>
+        <p class="text-lg font-semibold"><%= @invoice.client.prefix %>-<%= @invoice.num %></p>
       </div>
       <span class="px-2.5 py-1 rounded-full text-xs font-medium <%= STATUS_COLORS[@invoice.get_status] %>">
         <%= @invoice.get_status %>

@@ -107,14 +107,6 @@
       removeService(event) {
         event.preventDefault();
         const row = event.target.closest('[data-service-row]');
-        const idInput = row.querySelector('input[name*="[service_id]"]');
-        if (idInput && idInput.value) {
-          const hidden = document.createElement('input');
-          hidden.type = 'hidden';
-          hidden.name = 'invoice[delete_services][]';
-          hidden.value = idInput.value;
-          this.formTarget.appendChild(hidden);
-        }
         row.remove();
       }
     }

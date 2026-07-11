@@ -4,7 +4,7 @@
     <!-- Invoice header fields -->
     <div class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100 mb-5">
       <% [
-        ['Invoice #',     'num',            'text',   @invoice.formatted_invoice_num(@client)],
+        ['Invoice #',     'num',            'text',   @invoice.formatted_invoice_num],
         ['Date',          'invoice_date',   'text',   @invoice.formatted_invoice_date],
         ['Total Amount',  'total_amount',   'text',   @invoice.formatted_total_amount],
         ['Discount',      'total_discount', 'text',   @invoice.formatted_total_discount],
@@ -42,7 +42,6 @@
       <div data-invoice-form-target="servicesContainer">
         <% @services.each_with_index do |s, i| %>
           <div class="grid grid-cols-12 gap-2 items-center py-2 border-b border-gray-100" data-service-row>
-            <input type="hidden" name="invoice[services][<%= i %>][service_id]" value="<%= s.id %>">
             <input type="text"   name="invoice[services][<%= i %>][item]" value="<%= s.item %>"
               placeholder="Item"
               class="col-span-2 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-slate-500">

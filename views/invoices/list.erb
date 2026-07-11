@@ -1,6 +1,6 @@
 <div class="flex items-center justify-between mb-5">
   <a href="/clients" class="text-sm text-slate-600 hover:text-slate-900">&larr; All Clients</a>
-  <a href="/invoices/create/<%= @client.client_key %>"
+  <a href="/invoices/<%= @client.slug %>/create"
     class="px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white text-sm font-medium rounded-md transition-colors">
     New Invoice
   </a>
@@ -27,7 +27,7 @@
       <tbody class="divide-y divide-gray-100">
         <% @invoices.each do |inv| %>
           <tr class="hover:bg-gray-50">
-            <td class="px-4 py-3 font-medium"><%= @client.client_prefix %>-<%= inv.num %></td>
+            <td class="px-4 py-3 font-medium"><%= @client.prefix %>-<%= inv.num %></td>
             <td class="px-4 py-3 text-gray-600"><%= inv.formatted_invoice_date %></td>
             <td class="px-4 py-3 text-gray-900">$<%= inv.formatted_final_amount %></td>
             <td class="px-4 py-3">
@@ -36,10 +36,10 @@
               </span>
             </td>
             <td class="px-4 py-3 text-right space-x-3">
-              <a href="/invoices/<%= @client.client_key %>/<%= @client.client_prefix %>-<%= inv.num %>" class="text-xs text-slate-600 hover:text-slate-900 font-medium">View</a>
+              <a href="/invoices/<%= @client.slug %>/<%= inv.num %>" class="text-xs text-slate-600 hover:text-slate-900 font-medium">View</a>
               <% if inv.deletable? %>
-                <a href="/invoices/delete/<%= inv.id %>"
-                  onclick="return confirm('Delete invoice <%= @client.client_prefix %>-<%= inv.num %>?')"
+                <a href="/invoices/<%= @client.slug %>/<%= inv.num %>/delete"
+                  onclick="return confirm('Delete invoice <%= @client.prefix %>-<%= inv.num %>?')"
                   class="text-xs text-red-400 hover:text-red-600 font-medium">Delete</a>
               <% end %>
             </td>
