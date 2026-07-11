@@ -4,7 +4,11 @@ class Clients < SimplyBase
   before { authorize! }
 
   get '/' do
-    @clients = Client.all
+    per_page = 25
+    @page = [params[:page].to_i, 1].max
+    @total_pages = (Client.count.to_f / per_page).ceil
+    @clients = Client.order(:name).limit(per_page).offset((@page - 1) * per_page).all
+    @pagination_path = '/clients'
     @page_title = 'Clients'
     v :'clients/list'
   end

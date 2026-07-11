@@ -1,0 +1,15 @@
+<% if @total_pages > 1 %>
+  <div class="flex items-center justify-between mt-4">
+    <p class="text-sm text-gray-500">Page <%= @page %> of <%= @total_pages %></p>
+    <div class="flex gap-2">
+      <% if @page > 1 %>
+        <a href="<%= @pagination_path %>?page=<%= @page - 1 %>"
+          class="px-3 py-1.5 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 text-xs font-medium rounded-md">&larr; Previous</a>
+      <% end %>
+      <% if @page < @total_pages %>
+        <a href="<%= @pagination_path %>?page=<%= @page + 1 %>"
+          class="px-3 py-1.5 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 text-xs font-medium rounded-md">Next &rarr;</a>
+      <% end %>
+    </div>
+  </div>
+<% end %>

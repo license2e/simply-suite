@@ -11,7 +11,11 @@ class Invoices < SimplyBase
     halt 404 unless params[:client_key]
     @client = Client.first(client_key: params[:client_key])
     halt 404 unless @client
-    @invoices = Invoice.where(client_id: @client.id).order(Sequel.desc(:id)).limit(20).all
+    per_page = 20
+    @page = [params[:page].to_i, 1].max
+    @total_pages = (Invoice.where(client_id: @client.id).count.to_f / per_page).ceil
+    @invoices = Invoice.where(client_id: @client.id).order(Sequel.desc(:id)).limit(per_page).offset((@page - 1) * per_page).all
+    @pagination_path = "/invoices/#{@client.client_key}"
     @page_title = "Invoices — #{@client.name}"
     v :'invoices/list'
   end
