@@ -48,4 +48,17 @@ RSpec.describe 'Businesses', type: :request do
     expect(last_response.status).to eq(200)
     expect(last_response.headers['Content-Type']).to include('image')
   end
+
+  it 'flashes an error and still creates the business when the logo is not an image' do
+    non_image = Rack::Test::UploadedFile.new(File.expand_path('../../README.md', __dir__), 'text/plain')
+    post '/businesses',
+         business: { name: 'NoLogo Co', contact: 'M', email: 'n@x.com', street: '1', city: 'CLT', state: 'NC', zip: '28203' },
+         logo: non_image
+    expect(last_response.status).to eq(302)
+    follow_redirect!
+    expect(last_response.body).to match(/must be an image/i)
+    biz = Store::Business.find('nologo-co')
+    expect(biz).not_to be_nil
+    expect(biz.logo_file).to be_nil
+  end
 end

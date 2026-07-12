@@ -14,9 +14,14 @@ class Businesses < SimplyBase
       redirect '/businesses'
     end
     logo_src = nil
+    logo_rejected = false
     upload = params[:logo]
-    if upload && upload[:tempfile] && upload[:type].to_s.start_with?('image/')
-      logo_src = upload[:tempfile].path
+    if upload && upload[:tempfile]
+      if upload[:type].to_s.start_with?('image/')
+        logo_src = upload[:tempfile].path
+      else
+        logo_rejected = true
+      end
     end
     biz = Store::Business.create(
       { name: p[:name], contact: p[:contact], email: p[:email],
@@ -25,6 +30,7 @@ class Businesses < SimplyBase
     )
     session[:business] = biz.slug
     flash[:success] = "#{biz.name} created."
+    flash[:error] = 'Logo must be an image file — the business was created without a logo.' if logo_rejected
     redirect '/'
   end
 

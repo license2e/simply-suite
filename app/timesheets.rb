@@ -3,6 +3,8 @@ class Timesheets < SimplyBase
 
   before { require_business! }
 
+  helpers Store::Formattable
+
   helpers do
     def parse_rows(entries)
       (entries || {}).values.map do |e|
@@ -21,7 +23,7 @@ class Timesheets < SimplyBase
 
     def fmt_money(v)
       return '' if v.nil? || v.to_s.empty?
-      format('%.2f', v.to_f).gsub(/(\d)(?=(\d\d\d)+(?!\d))/, '\1,')
+      format_number(v, 2)   # shared with the store models via Store::Formattable
     end
 
     def fmt_line_total(entry)

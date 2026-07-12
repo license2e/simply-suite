@@ -112,6 +112,11 @@ module Store
       when 'quarterly' then y, q = key.split('-Q'); m = ((q.to_i - 1) * 3) + 1; self.class.key_for(Date.new(y.to_i, m, 1) >> (3 * n), 'quarterly')
       else y, m = key.split('-'); self.class.key_for(Date.new(y.to_i, m.to_i, 1) >> n, 'monthly')
       end
+    rescue ArgumentError
+      # A key whose format no longer matches the client's current granularity
+      # (e.g. granularity changed after period files existed) — stay put rather
+      # than 500 on prev/next navigation.
+      key
     end
 
     def add_to_period(target_key, entry)

@@ -6,7 +6,7 @@ module Store
     SCALARS = %i[num invoice_date total_amount total_discount amount_paid
                  is_complete terms notes approved_on sent_at paid_at].freeze
 
-    attr_reader :client, :data
+    attr_reader :client
 
     def initialize(client, data)
       @client = client
@@ -114,7 +114,7 @@ module Store
       end
     end
 
-    def deletable? = approved_on.nil?
+    def deletable? = approved_on.nil? && sent_at.nil?
     def editable?  = sent_at.nil?
 
     def pdf_filename = "#{client.prefix}-#{num}.pdf"

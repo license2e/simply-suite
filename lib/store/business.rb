@@ -5,7 +5,7 @@ module Store
                  terms: 'Payable upon receipt',
                  notes: 'Thank you for your business' }.freeze
 
-    attr_reader :slug, :data
+    attr_reader :slug
 
     def initialize(slug, data)
       @slug = slug
@@ -106,7 +106,7 @@ module Store
     end
 
     def to_h
-      @data
+      @data.dup
     end
   end
 end

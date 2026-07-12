@@ -3,7 +3,7 @@ module Store
   class Client
     FIELDS = %i[prefix name contact email street street2 city state zip].freeze
 
-    attr_reader :business, :data
+    attr_reader :business
 
     def initialize(business, data)
       @business = business
@@ -98,6 +98,6 @@ module Store
       { total: total, uninvoiced: uninvoiced }
     end
 
-    def to_h = @data
+    def to_h = @data.dup
   end
 end

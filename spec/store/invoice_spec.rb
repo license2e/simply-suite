@@ -54,4 +54,11 @@ RSpec.describe Store::Invoice do
     inv = client.create_invoice(num: '001', total_amount: 0, total_discount: 50, services: [])
     expect(inv.formatted_discount_percentage).to eq('0.0')
   end
+
+  it 'is deletable as a draft but not once sent' do
+    inv = client.create_invoice(services: [])
+    expect(inv.deletable?).to be true
+    inv.update(sent_at: Time.now)
+    expect(client.find_invoice(inv.num).deletable?).to be false
+  end
 end

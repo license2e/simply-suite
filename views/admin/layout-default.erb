@@ -30,10 +30,8 @@
       </a>
     </div>
     <div class="px-5 py-4 border-t border-slate-700">
-      <div class="flex items-center gap-3">
-        <span class="text-sm text-gray-500"><%= current_business&.name %></span>
-        <a class="text-sm text-blue-600 hover:underline" href="/businesses">Switch business</a>
-      </div>
+      <div class="text-sm font-medium text-slate-200 truncate" title="<%= current_business&.name %>"><%= current_business&.name %></div>
+      <a class="text-xs text-sky-300 hover:text-sky-200" href="/businesses">Switch business</a>
     </div>
   </aside>
 
@@ -92,7 +90,7 @@
     const app = Application.start();
 
     class InvoiceFormController extends Controller {
-      static targets = ['servicesContainer', 'serviceTemplate', 'form']
+      static targets = ['servicesContainer', 'serviceTemplate']
 
       connect() {
         this.serviceIndex = this.servicesContainerTarget.querySelectorAll('[data-service-row]').length;
