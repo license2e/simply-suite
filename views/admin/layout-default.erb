@@ -85,6 +85,7 @@
   <script type="module">
     // Stimulus is vendored locally (public/js/stimulus.js) — no CDN, works offline.
     import { Application, Controller } from '/js/stimulus.js';
+    import { parseClipboard } from '/js/timesheet-paste.js';
 
     const app = Application.start();
 
@@ -122,6 +123,48 @@
         event.preventDefault();
         const html = this.rowTemplateTarget.innerHTML.replace(/ROW_INDEX/g, this.rowIndex++);
         this.bodyTarget.insertAdjacentHTML('beforeend', html);
+      }
+
+      pasteRows(event) {
+        const text = event.clipboardData ? event.clipboardData.getData('text') : '';
+        // Only intercept a spreadsheet range; a single value pastes normally.
+        if (!/[\t\n]/.test(text)) return;
+        const rows = parseClipboard(text);
+        if (rows.length === 0) return;
+        event.preventDefault();
+        rows.forEach((r) => this._fillOrAddRow(r));
+        this.updateAllTotals();
+      }
+
+      _fillOrAddRow(r) {
+        let row = this._emptyEditableRow();
+        if (!row) {
+          const html = this.rowTemplateTarget.innerHTML.replace(/ROW_INDEX/g, this.rowIndex++);
+          this.bodyTarget.insertAdjacentHTML('beforeend', html);
+          row = this.bodyTarget.querySelector('[data-ts-row]:last-of-type');
+        }
+        this._setRowValue(row, 'service_date', r.date);
+        this._setRowValue(row, 'item', r.item);
+        this._setRowValue(row, 'desc', r.desc);
+        this._setRowValue(row, 'qty', r.qty);
+        this._setRowValue(row, 'cost', r.rate);
+      }
+
+      _setRowValue(row, field, value) {
+        const el = row.querySelector(`[name$="[${field}]"]`);
+        if (el && !el.disabled) el.value = value;
+      }
+
+      _emptyEditableRow() {
+        const fields = ['service_date', 'item', 'desc', 'qty', 'cost'];
+        return Array.from(this.bodyTarget.querySelectorAll('[data-ts-row]')).find((row) => {
+          const id = row.querySelector('[name$="[id]"]');
+          if (id && id.disabled) return false; // invoiced rows are disabled
+          return fields.every((f) => {
+            const el = row.querySelector(`[name$="[${f}]"]`);
+            return !el || el.value.trim() === '';
+          });
+        });
       }
 
       removeRow(event) {

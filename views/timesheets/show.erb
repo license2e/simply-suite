@@ -18,7 +18,7 @@
     </form>
   <% end %>
 
-  <form action="/timesheets/<%= @client.slug %>?period=<%= @period.key %>" method="post" data-timesheet-target="form">
+  <form action="/timesheets/<%= @client.slug %>?period=<%= @period.key %>" method="post" data-timesheet-target="form" data-action="paste->timesheet#pasteRows">
     <div class="bg-white rounded-xl border border-gray-200 overflow-x-auto">
       <table class="w-full text-sm min-w-[700px]">
         <thead class="bg-gray-50 border-b border-gray-200">
@@ -51,6 +51,7 @@
         Save
       </button>
     </div>
+    <p class="text-xs text-gray-400 mt-2">Tip: copy rows from a spreadsheet (Date · Item · Description · Qty · Rate) and paste (⌘/Ctrl+V) here.</p>
   </form>
 
   <!-- New row template -->
