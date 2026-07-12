@@ -35,7 +35,7 @@
         </thead>
         <tbody data-timesheet-target="body">
           <% @entries.each_with_index do |e, i| %>
-            <%== erb :'timesheets/_row', { layout: false }, { entry: e, index: i } %>
+            <%== erb :'timesheets/_row', { layout: false }, { entry: e, index: i, default_rate: @client.default_rate } %>
           <% end %>
         </tbody>
       </table>
@@ -55,7 +55,7 @@
 
   <!-- New row template -->
   <template data-timesheet-target="rowTemplate">
-    <%== erb :'timesheets/_row', { layout: false }, { entry: nil, index: 'ROW_INDEX' } %>
+    <%== erb :'timesheets/_row', { layout: false }, { entry: nil, index: 'ROW_INDEX', default_rate: @client.default_rate } %>
   </template>
 
 </div>

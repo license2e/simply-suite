@@ -1,3 +1,5 @@
+<% new_row = entry.nil? %>
+<% default_rate ||= nil %>
 <% entry ||= {} %>
 <% idx = index %>
 <% invoiced = !!entry[:invoiced] %>
@@ -25,7 +27,7 @@
       class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-slate-500 disabled:bg-transparent disabled:border-transparent disabled:text-gray-500">
   </td>
   <td class="px-2 py-1.5">
-    <input type="text" name="entries[<%= idx %>][cost]" value="<%= fmt_money(entry[:cost]) %>"
+    <input type="text" name="entries[<%= idx %>][cost]" value="<%= new_row ? fmt_money(default_rate) : fmt_money(entry[:cost]) %>"
       placeholder="0.00" <%= 'disabled' if invoiced %>
       data-action="input->timesheet#updateTotal" data-ts-cost
       class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-slate-500 disabled:bg-transparent disabled:border-transparent disabled:text-gray-500">

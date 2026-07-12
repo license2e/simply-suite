@@ -43,4 +43,13 @@ RSpec.describe Store::Client do
     c2 = biz.create_client(cattrs.merge(name: 'Create'))
     expect(c2.slug).not_to eq('create')
   end
+
+  it 'stores a sanitized per-client default rate (nil when blank)' do
+    c = biz.create_client(cattrs)
+    expect(c.default_rate).to be_nil
+    c.update(default_rate: '$125.00')
+    expect(biz.find_client(c.slug).default_rate).to eq('125.00')
+    c.update(default_rate: '')
+    expect(biz.find_client(c.slug).default_rate).to be_nil
+  end
 end

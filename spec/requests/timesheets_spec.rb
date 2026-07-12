@@ -27,4 +27,13 @@ RSpec.describe 'Timesheets', type: :request do
     expect(@client.invoices.size).to eq(1)
     expect(@client.timesheet_summary).to eq(total: 1, uninvoiced: 0)
   end
+
+  it 'pre-fills the new-row rate from the client default (blank when unset)' do
+    get '/timesheets/widgets-inc?period=2026-07'
+    expect(last_response.body).not_to include('value="125.00"')  # no default yet
+
+    @client.update(default_rate: '125')
+    get '/timesheets/widgets-inc?period=2026-07'
+    expect(last_response.body).to include('value="125.00"')       # new-row template pre-filled
+  end
 end

@@ -23,9 +23,20 @@ module Store
       timesheet_period_override || business.defaults[:timesheet_period]
     end
 
+    # Per-client default rate used to pre-fill new timesheet rows (stored as a
+    # sanitized string, e.g. "125" / "125.50"; nil when unset).
+    def default_rate
+      v = @data[:default_rate]
+      v.nil? || v.to_s.empty? ? nil : v.to_s
+    end
+
     def update(attrs)
       FIELDS.each { |f| @data[f] = attrs[f] if attrs.key?(f) }
       @data[:timesheet_period] = attrs[:timesheet_period] if attrs.key?(:timesheet_period)
+      if attrs.key?(:default_rate)
+        raw = attrs[:default_rate].to_s.gsub(/[^\d.]/, '')
+        @data[:default_rate] = raw.empty? ? nil : raw
+      end
       @data[:updated_at] = Store.now_iso
       Store.write_json(File.join(dir, 'client.json'), @data)
       self

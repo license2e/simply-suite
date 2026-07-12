@@ -42,4 +42,14 @@ RSpec.describe 'Clients', type: :request do
     expect(last_response.status).to eq(302)
     expect(last_response.location).to include('/businesses')
   end
+
+  it 'persists a per-client default rate from the edit form' do
+    select_business
+    @biz.create_client(name: 'Rate Co', prefix: 'RC', contact: 'x', email: 'r@x.com',
+                       street: '1', street2: '', city: 'CLT', state: 'NC', zip: '28203')
+    post '/clients/rate-co', client: { client_prefix: 'RC', name: 'Rate Co', contact: 'x', email: 'r@x.com',
+                                       street: '1', street2: '', city: 'CLT', state: 'NC', zip: '28203',
+                                       default_rate: '$150' }
+    expect(@biz.find_client('rate-co').default_rate).to eq('150')
+  end
 end

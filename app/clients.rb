@@ -64,7 +64,8 @@ class Clients < SimplyBase
     client.update(
       prefix: p[:client_prefix], name: p[:name], contact: p[:contact], email: p[:email],
       street: p[:street], street2: p[:street2], city: p[:city], state: p[:state], zip: p[:zip],
-      timesheet_period: (p[:timesheet_period].to_s.empty? ? nil : p[:timesheet_period])
+      timesheet_period: (p[:timesheet_period].to_s.empty? ? nil : p[:timesheet_period]),
+      default_rate: p[:default_rate]
     )
     flash[:success] = 'Client updated successfully'
     redirect '/clients'
