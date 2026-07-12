@@ -82,10 +82,9 @@
     });
   </script>
 
-  <!-- TODO: add integrity= SRI hashes once pinned versions are confirmed -->
   <script type="module">
-    import * as Turbo from 'https://cdn.jsdelivr.net/npm/@hotwired/turbo@8/dist/turbo.es2017.esm.js';
-    import { Application, Controller } from 'https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3/dist/stimulus.js';
+    // Stimulus is vendored locally (public/js/stimulus.js) — no CDN, works offline.
+    import { Application, Controller } from '/js/stimulus.js';
 
     const app = Application.start();
 

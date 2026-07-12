@@ -16,6 +16,14 @@ RSpec.describe 'Businesses', type: :request do
     expect(last_response.body).to match(/Create.*business/i)
   end
 
+  it 'loads Stimulus from the local vendored file, with no CDN import' do
+    # Regression: a 404ing CDN import (Turbo) aborted the whole <script type=module>,
+    # so no Stimulus controller connected and Add Row / Add Service did nothing.
+    get '/businesses'
+    expect(last_response.body).to include("from '/js/stimulus.js'")
+    expect(last_response.body).not_to include('cdn.jsdelivr')
+  end
+
   it 'renders the onboarding form as real HTML, not escaped text' do
     # Regression: `escape_html: true` made `<%= erb :partial %>` escape the
     # partial's HTML into visible text. The nested render must use `<%==`.
