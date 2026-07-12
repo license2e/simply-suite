@@ -16,6 +16,15 @@ RSpec.describe 'Businesses', type: :request do
     expect(last_response.body).to match(/Create.*business/i)
   end
 
+  it 'renders the onboarding form as real HTML, not escaped text' do
+    # Regression: `escape_html: true` made `<%= erb :partial %>` escape the
+    # partial's HTML into visible text. The nested render must use `<%==`.
+    get '/businesses'
+    expect(last_response.body).to include('<form method="post" action="/businesses"')
+    expect(last_response.body).to include('name="business[name]"')
+    expect(last_response.body).not_to include('&lt;form')
+  end
+
   it 'creates a business and selects it' do
     post '/businesses', business: { name: 'Acme Consulting', contact: 'Me', email: 'a@x.com',
                                     street: '1 Main', city: 'CLT', state: 'NC', zip: '28203' }
