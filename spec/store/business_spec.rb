@@ -37,4 +37,9 @@ RSpec.describe Store::Business do
     expect(b.logo_file).to eq(File.join(b.dir, 'config', 'logo.png'))
     expect(b.resolve_logo[:web]).to match(%r{\A/businesses/logo\?v=\d+\z})
   end
+
+  it 'reserves the "new" and "logo" slugs so a business cannot shadow those routes' do
+    expect(Store::Business.create(attrs.merge(name: 'New')).slug).not_to eq('new')
+    expect(Store::Business.create(attrs.merge(name: 'Logo')).slug).not_to eq('logo')
+  end
 end

@@ -13,7 +13,7 @@ module Store
     end
 
     def self.create(attrs, logo_src = nil)
-      slug = Store.slugify(attrs[:name], taken: all.map(&:slug))
+      slug = Store.slugify(attrs[:name], taken: all.map(&:slug) + %w[new logo])
       data = { slug: slug }
       FIELDS.each { |f| data[f] = attrs[f] }
       data[:defaults] = DEFAULTS.merge(attrs[:defaults] || {})

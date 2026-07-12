@@ -1,0 +1,83 @@
+<%
+  d = @business ? @business.defaults : Store::Business::DEFAULTS
+  logo_url = @business&.logo_file ? "/businesses/#{@business.slug}/logo?v=#{File.mtime(@business.logo_file).to_i}" : nil
+%>
+<div class="max-w-2xl mx-auto mt-10 space-y-6">
+  <% if @first_business %>
+    <div>
+      <h1 class="text-2xl font-semibold mb-1">Welcome to Simply Suite</h1>
+      <p class="text-gray-600">Create your first business to get started.</p>
+    </div>
+  <% else %>
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-semibold"><%= @business ? "Edit #{@business.name}" : 'New business' %></h1>
+      <a href="/businesses" class="text-sm text-slate-600 hover:text-slate-900">&larr; Back to businesses</a>
+    </div>
+  <% end %>
+
+  <form action="<%= @action_url %>" method="post" enctype="multipart/form-data" class="space-y-8">
+    <!-- Company / From -->
+    <section>
+      <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">Company</h2>
+      <div class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+        <% [
+          ['Name',    'name',    'text',  @business&.name],
+          ['Contact', 'contact', 'text',  @business&.contact],
+          ['Email',   'email',   'email', @business&.email],
+          ['Street',  'street',  'text',  @business&.street],
+          ['City',    'city',    'text',  @business&.city],
+          ['State',   'state',   'text',  @business&.state],
+          ['ZIP',     'zip',     'text',  @business&.zip],
+        ].each do |label, field, type, val| %>
+          <div class="px-5 py-4 flex items-center gap-4">
+            <label class="w-32 text-xs font-medium text-gray-500 uppercase tracking-wider flex-shrink-0"><%= label %></label>
+            <input type="<%= type %>" name="business[<%= field %>]" value="<%= val %>"
+              class="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
+          </div>
+        <% end %>
+        <div class="px-5 py-4 flex items-center gap-4">
+          <label class="w-32 text-xs font-medium text-gray-500 uppercase tracking-wider flex-shrink-0">Timesheet period</label>
+          <select name="business[timesheet_period]" class="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
+            <% %w[daily weekly monthly quarterly].each do |g| %>
+              <option value="<%= g %>" <%= 'selected' if d[:timesheet_period] == g %>><%= g.capitalize %></option>
+            <% end %>
+          </select>
+        </div>
+        <div class="px-5 py-4 flex items-center gap-4">
+          <label class="w-32 text-xs font-medium text-gray-500 uppercase tracking-wider flex-shrink-0">Terms</label>
+          <input type="text" name="business[terms]" value="<%= d[:terms] %>"
+            class="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
+        </div>
+        <div class="px-5 py-4 flex items-center gap-4">
+          <label class="w-32 text-xs font-medium text-gray-500 uppercase tracking-wider flex-shrink-0">Notes</label>
+          <input type="text" name="business[notes]" value="<%= d[:notes] %>"
+            class="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
+        </div>
+      </div>
+    </section>
+
+    <!-- Logo -->
+    <section>
+      <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">Invoice Logo</h2>
+      <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+        <% if logo_url %>
+          <div class="p-3 bg-gray-50 rounded-lg inline-block">
+            <img src="<%= logo_url %>" alt="Logo" class="max-h-16 max-w-xs object-contain">
+          </div>
+        <% end %>
+        <input type="file" name="logo" accept="image/*"
+          class="text-sm text-gray-600
+            file:mr-3 file:px-3 file:py-1.5 file:rounded-md
+            file:border file:border-gray-300 file:text-xs file:font-medium
+            file:bg-white file:text-gray-700 hover:file:border-gray-400 file:cursor-pointer">
+        <p class="text-xs text-gray-400">PNG recommended. Shown on invoices and PDF exports.<%= ' Leave blank to keep the current logo.' if logo_url %></p>
+      </div>
+    </section>
+
+    <div class="flex items-center gap-3">
+      <button type="submit"
+        class="px-5 py-2 bg-slate-700 hover:bg-slate-800 text-white text-sm font-medium rounded-md transition-colors cursor-pointer"><%= @submit_value %></button>
+      <a href="/businesses" class="text-sm text-gray-500 hover:text-gray-700">Cancel</a>
+    </div>
+  </form>
+</div>

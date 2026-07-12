@@ -11,7 +11,6 @@ require 'base'
 
 map '/clients'    do require 'clients';    run Clients    end
 map '/invoices'   do require 'invoices';   run Invoices   end
-map '/settings'   do require 'settings';   run Settings   end
 map '/timesheets' do require 'timesheets'; run Timesheets end
 map '/businesses' do require 'businesses'; run Businesses  end
 map '/'           do require 'dashboard';  run Dashboard  end
