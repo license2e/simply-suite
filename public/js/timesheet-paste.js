@@ -33,11 +33,12 @@ export function parseClipboard(text) {
     .filter((line) => line.trim() !== '')
     .map((line) => {
       const c = line.split('\t');
+      // Column order: Date, Item, Qty, Description, Rate
       return {
         date: normalizeDate(c[0] ?? ''),
         item: String(c[1] ?? '').trim(),
-        desc: String(c[2] ?? '').trim(),
-        qty:  String(c[3] ?? '').trim(),
+        qty:  String(c[2] ?? '').trim(),
+        desc: String(c[3] ?? '').trim(),
         rate: normalizeRate(c[4] ?? ''),
       };
     });

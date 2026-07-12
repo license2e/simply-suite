@@ -15,7 +15,7 @@ The clipboard produced by a spreadsheet copy is **tab-separated values** (cells 
 Design decisions (all approved):
 
 1. **Input method:** paste directly onto the grid (not an upload or a separate paste box).
-2. **Column layout:** fixed grid order — `Date · Item · Description · Qty · Rate`. A header row is auto-detected and skipped.
+2. **Column layout:** fixed grid order — `Date · Item · Qty · Description · Rate`. A header row is auto-detected and skipped.
 3. **Existing rows:** append — pasted rows fill any empty editable rows first, then add new ones; saved/invoiced rows are never touched.
 4. **Parsing location:** client-side, in the already-vendored Stimulus (`public/js/stimulus.js`). No new route, no AJAX.
 
@@ -36,7 +36,7 @@ Design decisions (all approved):
 ## Section 2: Column Mapping & Normalization
 
 - Split the clipboard text into lines (on `\r\n` or `\n`), dropping a trailing empty line. Split each line into cells on `\t`.
-- Cells map **positionally** to the grid columns, in order: `Date, Item, Description, Qty, Rate`.
+- Cells map **positionally** to the grid columns, in order: `Date, Item, Qty, Description, Rate`.
   - Fewer than 5 cells: fill from the left; missing trailing columns stay blank.
   - More than 5 cells: ignore the extras.
 - **Header detection:** if the first line's Date cell does not parse as a date, treat the entire first line as a header and skip it. (A real data row's first column is a date; a header's is text like "Date".)
@@ -64,7 +64,7 @@ Design decisions (all approved):
 ## Section 4: Discoverability
 
 - Add a one-line hint under the grid (near the "Add Row" / "Save" controls):
-  > *Copy rows from a spreadsheet (Date · Item · Description · Qty · Rate) and paste here.*
+  > *Copy rows from a spreadsheet (Date · Item · Qty · Description · Rate) and paste here.*
 - No new button is required — paste is the affordance. The hint makes it discoverable.
 
 ---

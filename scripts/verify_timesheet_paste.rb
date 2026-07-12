@@ -27,7 +27,7 @@ Thread.new { launcher.run }
 # wait for boot
 20.times { (Net::HTTP.get_response(URI("http://127.0.0.1:#{PORT}/businesses")) rescue nil) && break; sleep 0.25 }
 
-tsv = "Date\tItem\tDescription\tQty\tRate\n7/5/2026\tDev\tBuild API\t3\t$1,250.00\n2026-07-06\tDesign\tMockups\t2\t100\n7/7/2026\tSupport\tEmail\t1\t"
+tsv = "Date\tItem\tQty\tDescription\tRate\n7/5/2026\tDev\t3\tBuild API\t$1,250.00\n2026-07-06\tDesign\t2\tMockups\t100\n7/7/2026\tSupport\t1\tEmail\t"
 browser = Ferrum::Browser.new(headless: true, browser_options: { 'no-sandbox': nil }, timeout: 20)
 begin
   browser.goto("http://127.0.0.1:#{PORT}/businesses")

@@ -16,14 +16,14 @@
       class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-slate-500 disabled:bg-transparent disabled:border-transparent disabled:text-gray-500">
   </td>
   <td class="px-2 py-1.5">
-    <input type="text" name="entries[<%= idx %>][desc]" value="<%= entry[:desc] %>"
-      placeholder="Description" <%= 'disabled' if invoiced %>
-      class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-slate-500 disabled:bg-transparent disabled:border-transparent disabled:text-gray-500">
-  </td>
-  <td class="px-2 py-1.5">
     <input type="number" name="entries[<%= idx %>][qty]" value="<%= entry[:qty] %>" step="0.5" min="0"
       placeholder="0" <%= 'disabled' if invoiced %>
       data-action="input->timesheet#updateTotal" data-ts-qty
+      class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-slate-500 disabled:bg-transparent disabled:border-transparent disabled:text-gray-500">
+  </td>
+  <td class="px-2 py-1.5">
+    <input type="text" name="entries[<%= idx %>][desc]" value="<%= entry[:desc] %>"
+      placeholder="Description" <%= 'disabled' if invoiced %>
       class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-slate-500 disabled:bg-transparent disabled:border-transparent disabled:text-gray-500">
   </td>
   <td class="px-2 py-1.5">

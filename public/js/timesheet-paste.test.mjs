@@ -24,12 +24,12 @@ test('looksLikeDate recognizes only US + ISO date shapes', () => {
   assert.equal(looksLikeDate(''), false);
 });
 
-test('parseClipboard maps columns positionally and skips a header row', () => {
-  const tsv = 'Date\tItem\tDescription\tQty\tRate\n7/5/2026\tDev\tBuild API\t3\t$125\n2026-07-06\tDesign\tMockups\t2\t100';
+test('parseClipboard maps columns positionally (Date, Item, Qty, Description, Rate) and skips a header row', () => {
+  const tsv = 'Date\tItem\tQty\tDescription\tRate\n7/5/2026\tDev\t3\tBuild API\t$125\n2026-07-06\tDesign\t2\tMockups\t100';
   const rows = parseClipboard(tsv);
   assert.equal(rows.length, 2);
-  assert.deepEqual(rows[0], { date: '07/05/2026', item: 'Dev', desc: 'Build API', qty: '3', rate: '125' });
-  assert.deepEqual(rows[1], { date: '07/06/2026', item: 'Design', desc: 'Mockups', qty: '2', rate: '100' });
+  assert.deepEqual(rows[0], { date: '07/05/2026', item: 'Dev', qty: '3', desc: 'Build API', rate: '125' });
+  assert.deepEqual(rows[1], { date: '07/06/2026', item: 'Design', qty: '2', desc: 'Mockups', rate: '100' });
 });
 
 test('parseClipboard keeps a first row that starts with a date (no header)', () => {
@@ -39,10 +39,10 @@ test('parseClipboard keeps a first row that starts with a date (no header)', () 
 });
 
 test('parseClipboard fills missing trailing columns and ignores extras', () => {
-  assert.deepEqual(parseClipboard('7/5/2026\tDev\tx')[0],
-                   { date: '07/05/2026', item: 'Dev', desc: 'x', qty: '', rate: '' });
-  assert.deepEqual(parseClipboard('7/5/2026\tDev\tx\t1\t50\tEXTRA')[0],
-                   { date: '07/05/2026', item: 'Dev', desc: 'x', qty: '1', rate: '50' });
+  assert.deepEqual(parseClipboard('7/5/2026\tDev\t2')[0],
+                   { date: '07/05/2026', item: 'Dev', qty: '2', desc: '', rate: '' });
+  assert.deepEqual(parseClipboard('7/5/2026\tDev\t2\tWork\t50\tEXTRA')[0],
+                   { date: '07/05/2026', item: 'Dev', qty: '2', desc: 'Work', rate: '50' });
 });
 
 test('parseClipboard handles CRLF and trailing blank lines; empty -> []', () => {
