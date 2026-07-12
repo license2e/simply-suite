@@ -20,6 +20,10 @@
       'City'         => @client.city,
       'State'        => @client.state,
       'ZIP'          => @client.zip,
+      'Timesheet Period' => (@client.timesheet_period_override ?
+                              "#{@client.timesheet_period_override.capitalize} (override)" :
+                              "#{@client.resolved_timesheet_period.to_s.capitalize} (business default)"),
+      'Default Rate' => (@client.default_rate ? "$#{'%.2f' % @client.default_rate.to_f}" : '—'),
     }.each do |label, value| %>
       <div class="px-5 py-3 flex">
         <span class="w-32 text-xs font-medium text-gray-500 uppercase tracking-wider pt-0.5"><%= label %></span>

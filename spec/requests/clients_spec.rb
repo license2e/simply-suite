@@ -43,6 +43,16 @@ RSpec.describe 'Clients', type: :request do
     expect(last_response.location).to include('/businesses')
   end
 
+  it 'shows the timesheet period and default rate on the client view page' do
+    select_business
+    c = @biz.create_client(name: 'View Co', prefix: 'VC', contact: 'x', email: 'v@x.com',
+                           street: '1', street2: '', city: 'CLT', state: 'NC', zip: '28203')
+    c.update(timesheet_period: 'weekly', default_rate: '200')
+    get '/clients/view/view-co'
+    expect(last_response.body).to include('Weekly (override)')
+    expect(last_response.body).to include('$200.00')
+  end
+
   it 'persists a per-client default rate from the edit form' do
     select_business
     @biz.create_client(name: 'Rate Co', prefix: 'RC', contact: 'x', email: 'r@x.com',
