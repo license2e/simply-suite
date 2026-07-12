@@ -147,7 +147,7 @@
         this._setRowValue(row, 'item', r.item);
         this._setRowValue(row, 'desc', r.desc);
         this._setRowValue(row, 'qty', r.qty);
-        this._setRowValue(row, 'cost', r.rate);
+        if (r.rate !== '') this._setRowValue(row, 'cost', r.rate);
       }
 
       _setRowValue(row, field, value) {

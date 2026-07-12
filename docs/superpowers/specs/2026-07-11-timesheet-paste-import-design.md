@@ -44,7 +44,7 @@ Design decisions (all approved):
   - `MM/DD/YYYY` and `M/D/YYYY` (US, with or without zero-padding)
   - `YYYY-MM-DD` (ISO)
   - An unrecognized date is left **as pasted** (the field is a plain text input) so the user can see and fix it; on Save, `parse_rows` already does `Date.strptime(..., '%m/%d/%Y') rescue nil`, so a bad date becomes `nil` rather than an error.
-- **Rate normalization:** strip everything except digits and `.` (removes `$`, thousands `,`). Blank stays blank.
+- **Rate normalization:** strip everything except digits and `.` (removes `$`, thousands `,`). A blank Rate cell parses to an empty string; row handling (Section 3) then leaves the row's default rate in place rather than clearing it.
 - **Qty:** taken as-is (the Qty input is `type=number`; a non-numeric value is simply ignored by the browser/`to_f` on save).
 - **Item / Description:** taken as-is (trimmed of surrounding whitespace).
 
