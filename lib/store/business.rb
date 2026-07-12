@@ -94,7 +94,7 @@ module Store
     end
 
     def create_client(attrs)
-      slug = Store.slugify(attrs[:name], taken: Store.list_dirs(clients_dir))
+      slug = Store.slugify(attrs[:name], taken: Store.list_dirs(clients_dir) + %w[archive create])
       data = { slug: slug }
       Client::FIELDS.each { |f| data[f] = attrs[f] }
       data[:timesheet_period] = attrs[:timesheet_period]

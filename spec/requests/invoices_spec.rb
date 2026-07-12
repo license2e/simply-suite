@@ -95,4 +95,22 @@ RSpec.describe 'Invoices', type: :request do
     get '/invoices/widgets-inc/001/mark_sent'
     expect(@client.find_invoice('001').get_status).to eq('sent')
   end
+
+  it 'create form pre-fills the number field with the next free number' do
+    @client.create_invoice(num: '001', services: [])
+    get '/invoices/widgets-inc/create'
+    expect(last_response.body).to include('value="002"')
+  end
+
+  it 'does not overwrite an existing invoice when an explicit duplicate num is submitted' do
+    @client.create_invoice(num: '001', services: [{ item: 'Original', desc: 'orig', qty: 1, cost: 100 }])
+
+    post '/invoices/widgets-inc/create', { 'invoice[num]' => '001', 'invoice[invoice_date]' => '07/09/2026',
+      'invoice[total_amount]' => '999', 'invoice[total_discount]' => '0', 'invoice[amount_paid]' => '0',
+      'invoice[terms]' => 'Net 30', 'invoice[notes]' => 'thanks' }.merge(svc(0))
+
+    expect(last_response.status).to eq(302)
+    expect(@client.invoices.size).to eq(1)
+    expect(@client.find_invoice('001').services.first.item).to eq('Original')
+  end
 end

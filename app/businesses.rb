@@ -1,5 +1,3 @@
-require 'fileutils'
-
 class Businesses < SimplyBase
   set :layout_default, :'admin/layout-default'
 

@@ -7,6 +7,8 @@ require 'time'
 module Store
   APP_ROOT = File.expand_path('..', __dir__)
 
+  class DuplicateInvoiceNumber < StandardError; end
+
   class << self
     attr_writer :data_root
 

@@ -57,7 +57,9 @@ module Store
     end
 
     def next_num
-      nums = Store.list_files(invoices_dir, '.json').map { |f| File.basename(f, '.json') }
+      nums = (Store.list_files(invoices_dir, '.json') +
+              Store.list_files(File.join(invoices_dir, 'archive'), '.json'))
+             .map { |f| File.basename(f, '.json') }
       return '001' if nums.empty?
       width = nums.map(&:length).max            # pad to widest existing (no forced min once numbers exist)
       max   = nums.map(&:to_i).max
@@ -66,6 +68,9 @@ module Store
 
     def create_invoice(attrs)
       num = attrs[:num].to_s.empty? ? next_num : attrs[:num].to_s
+      if File.exist?(File.join(invoices_dir, "#{num}.json"))
+        raise Store::DuplicateInvoiceNumber, "Invoice #{num} already exists"
+      end
       inv = Invoice.new(self, Invoice.blank_data(num))
       inv.update(attrs.merge(num: num))
       inv

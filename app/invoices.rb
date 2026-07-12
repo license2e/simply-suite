@@ -1,5 +1,3 @@
-require 'fileutils'
-
 class Invoices < SimplyBase
   set :layout_default, :'admin/layout-default'
 
@@ -51,7 +49,7 @@ class Invoices < SimplyBase
 
   get '/:client_key/create' do
     @client = find_client!(params[:client_key])
-    @invoice = Store::Invoice.new(@client, Store::Invoice.blank_data(''))
+    @invoice = Store::Invoice.new(@client, Store::Invoice.blank_data(@client.next_num))
     @services = [Store::Service.new({})]
     @action_url = "/invoices/#{@client.slug}/create"
     @submit_value = 'Create Invoice'
@@ -64,7 +62,12 @@ class Invoices < SimplyBase
     client = find_client!(params[:client_key])
     data = gather_invoice_data(params[:invoice]).merge(services: submitted_services(params[:invoice]))
     data[:is_complete] = true
-    invoice = client.create_invoice(data)
+    begin
+      invoice = client.create_invoice(data)
+    rescue Store::DuplicateInvoiceNumber => e
+      flash[:error] = e.message
+      redirect "/invoices/#{client.slug}/create"
+    end
     create_invoice_pdf(invoice, current_business)
     flash[:success] = 'Invoice created successfully'
     redirect "/invoices/#{client.slug}"

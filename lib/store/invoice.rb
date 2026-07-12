@@ -87,6 +87,7 @@ module Store
     def formatted_total_discount = format_number(total_discount || 0, 2)
 
     def formatted_discount_percentage
+      return format_number(0, 1) if total_amount.to_f == 0
       format_number((total_discount.to_f / total_amount.to_f) * 100, 1)
     end
 

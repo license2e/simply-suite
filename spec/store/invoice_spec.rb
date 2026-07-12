@@ -36,4 +36,22 @@ RSpec.describe Store::Invoice do
     expect(File.exist?(File.join(client.invoices_dir, 'archive', "#{inv.num}.json"))).to be true
     expect(File.exist?(File.join(client.invoices_dir, 'archive', inv.pdf_filename))).to be true
   end
+
+  it 'raises DuplicateInvoiceNumber instead of overwriting an existing invoice' do
+    client.create_invoice(num: '001', services: [])
+    expect do
+      client.create_invoice(num: '001', services: [])
+    end.to raise_error(Store::DuplicateInvoiceNumber)
+  end
+
+  it 'next_num skips archived numbers so a deleted draft cannot be reused' do
+    inv = client.create_invoice(num: '001', services: [])
+    inv.soft_delete
+    expect(client.next_num).to eq('002')
+  end
+
+  it 'formatted_discount_percentage is 0.0 when total_amount is zero' do
+    inv = client.create_invoice(num: '001', total_amount: 0, total_discount: 50, services: [])
+    expect(inv.formatted_discount_percentage).to eq('0.0')
+  end
 end

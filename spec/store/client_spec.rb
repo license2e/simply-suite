@@ -35,4 +35,12 @@ RSpec.describe Store::Client do
     expect(biz.find_client('widgets-inc')).to be_nil
     expect(File.exist?(File.join(biz.dir, 'clients', 'archive', 'widgets-inc', 'client.json'))).to be true
   end
+
+  it 'reserves the "archive" and "create" slugs so clients cannot collide with them' do
+    c1 = biz.create_client(cattrs.merge(name: 'Archive'))
+    expect(c1.slug).not_to eq('archive')
+
+    c2 = biz.create_client(cattrs.merge(name: 'Create'))
+    expect(c2.slug).not_to eq('create')
+  end
 end
