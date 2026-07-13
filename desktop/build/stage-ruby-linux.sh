@@ -20,5 +20,5 @@ rm -rf "$DEST"
 make install
 
 "$DEST/bin/ruby" -v
-"$DEST/bin/gem" install bundler --no-document
+"$DEST/bin/gem" install bundler --no-document --force
 echo "Bundled Ruby ready."
