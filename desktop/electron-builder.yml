@@ -1,0 +1,29 @@
+appId: co.doublenot.simply-suite
+productName: Simply Suite
+directories:
+  output: dist
+files:
+  - src/**/*
+  - package.json
+extraResources:
+  # The Ruby app (source + standalone vendored gems) → resources/app
+  - from: ../
+    to: app
+    filter:
+      - "**/*"
+      - "!desktop/**"
+      - "!.git/**"
+      - "!spec/**"
+      - "!docs/**"
+      - "!data/**"
+      - "!dist/**"
+      - "!node_modules/**"
+      - "!tailwindcss"
+  # The relocatable Ruby runtime → resources/ruby
+  - from: vendor/ruby-linux
+    to: ruby
+linux:
+  target:
+    - AppImage
+    - deb
+  category: Office
