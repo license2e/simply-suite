@@ -27,3 +27,21 @@ linux:
     - AppImage
     - deb
   category: Office
+mac:
+  target:
+    - dmg
+  category: public.app-category.business
+  # Unsigned: never attempt to sign or notarize.
+  identity: null
+dmg:
+  # Two Mac build jobs (arm64, x86_64) publish to one Release — keep names distinct.
+  artifactName: ${productName}-${version}-${arch}.${ext}
+win:
+  target:
+    - nsis
+nsis:
+  # Per-user install (no admin/UAC) — appropriate for an unsigned app.
+  oneClick: true
+  perMachine: false
+publish:
+  provider: github
