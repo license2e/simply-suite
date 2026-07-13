@@ -12,7 +12,9 @@
     "smoke": "node build/smoke.js",
     "build:ruby": "bash build/stage-ruby-linux.sh",
     "build:ruby:mac": "bash build/stage-ruby-mac.sh",
+    "build:ruby:win": "powershell -ExecutionPolicy Bypass -File build/stage-ruby-win.ps1",
     "build:gems": "bash build/vendor-gems.sh",
+    "build:gems:win": "powershell -ExecutionPolicy Bypass -File build/vendor-gems.ps1",
     "dist": "electron-builder"
   },
   "devDependencies": {
