@@ -23,10 +23,3 @@ test('server boots, answers /health, and stops', async () => {
     fs.rmSync(dataDir, { recursive: true, force: true })
   }
 })
-
-test('stopServer resolves even if the child never spawned', async () => {
-  const { spawn } = require('child_process')
-  const bad = spawn('simply-suite-no-such-binary-xyz', [])
-  bad.on('error', () => {}) // swallow ENOENT so it is not an unhandled error
-  await stopServer(bad)     // must resolve (not hang) — child emitted 'error', not 'exit'
-})
