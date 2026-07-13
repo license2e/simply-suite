@@ -68,13 +68,20 @@ function stopServer(child) {
   return new Promise((resolve) => {
     if (!child || child.exitCode !== null || child.signalCode !== null) return resolve()
     let done = false
-    const finish = () => { if (!done) { done = true; resolve() } }
+    let killTimer = null
+    const finish = () => {
+      if (done) return
+      done = true
+      if (killTimer) clearTimeout(killTimer)
+      resolve()
+    }
     child.once('exit', finish)
+    child.once('error', finish) // a child that never spawned emits 'error', not 'exit'
     if (process.platform === 'win32') {
       spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'])
     } else {
       child.kill('SIGTERM')
-      setTimeout(() => { if (!done) child.kill('SIGKILL') }, 5000)
+      killTimer = setTimeout(() => { if (!done) child.kill('SIGKILL') }, 5000)
     }
   })
 }
