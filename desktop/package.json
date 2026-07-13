@@ -1,5 +1,6 @@
 {
   "name": "simply-suite-desktop",
+  "productName": "Simply Suite",
   "version": "0.1.0",
   "description": "Desktop shell for Simply Suite",
   "main": "src/main.js",
