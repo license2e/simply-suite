@@ -44,6 +44,12 @@ function augmentedPath() {
   return [...extra, process.env.PATH || ''].filter(Boolean).join(path.delimiter)
 }
 
+// Basename of the Ruby executable for a platform. Windows ships ruby.exe;
+// macOS/Linux ship ruby. Used to locate the bundled Ruby in the packaged app.
+function rubyBinName(platform = process.platform) {
+  return platform === 'win32' ? 'ruby.exe' : 'ruby'
+}
+
 // Spawn the Ruby/Puma server. Returns the ChildProcess.
 function startServer({ appDir, dataDir, sessionSecret, port, logStream, launcher = rubyLauncher }) {
   const { cmd, args } = launcher(appDir)
@@ -109,4 +115,4 @@ function stopServer(child) {
   })
 }
 
-module.exports = { pickFreePort, rubyLauncher, startServer, waitForHealth, stopServer }
+module.exports = { pickFreePort, rubyLauncher, startServer, waitForHealth, stopServer, rubyBinName }

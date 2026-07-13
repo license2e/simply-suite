@@ -3,7 +3,7 @@ const path = require('path')
 const fs = require('fs')
 const { loadSettings, saveSettings, getOrCreateSessionSecret } = require('./settings')
 const { defaultDataDir, initializeDataFolder, isDataFolder, resolveTarget } = require('./data-dir')
-const { pickFreePort, rubyLauncher, startServer, waitForHealth, stopServer } = require('./server')
+const { pickFreePort, rubyLauncher, startServer, waitForHealth, stopServer, rubyBinName } = require('./server')
 const { createSplash, closeSplash, createMainWindow } = require('./windows')
 const { runOnboarding, chooseFolder, confirmAdopt, showErrorBox } = require('./dialogs')
 const { migrate } = require('./migration')
@@ -25,7 +25,7 @@ let isQuitting = false
 function launcher(appDir) {
   if (app.isPackaged) {
     return {
-      cmd: path.join(process.resourcesPath, 'ruby', 'bin', 'ruby'),
+      cmd: path.join(process.resourcesPath, 'ruby', 'bin', rubyBinName()),
       args: [path.join(appDir, 'desktop_boot.rb')]
     }
   }
