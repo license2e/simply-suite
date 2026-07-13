@@ -1,0 +1,13 @@
+{
+  "name": "simply-suite-desktop",
+  "version": "0.1.0",
+  "description": "Desktop shell for Simply Suite",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0"
+  }
+}

@@ -8,3 +8,7 @@ db/screenshot.sqlite3
 
 # JSON file store (migrated business data — never commit)
 data/
+
+desktop/node_modules/
+desktop/dist/
+desktop/vendor/
