@@ -18,16 +18,17 @@ async function main() {
   // Launch exactly like the packaged app: absolute bundled-Ruby path, no Bundler shim.
   const launcher = (appDir) => ({ cmd: RUBY_BIN, args: [path.join(appDir, 'desktop_boot.rb')] })
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ss-smoke-'))
-  const port = await pickFreePort()
-  const child = startServer({
-    appDir: APP_DIR, dataDir, sessionSecret: 'smoke-secret', port,
-    launcher, logStream: process.stdout
-  })
+  let child = null
   try {
+    const port = await pickFreePort()
+    child = startServer({
+      appDir: APP_DIR, dataDir, sessionSecret: 'smoke-secret', port,
+      launcher, logStream: process.stdout
+    })
     await waitForHealth(port, { timeoutMs: 60000 })
     console.log('SMOKE OK: /health returned 200')
   } finally {
-    await stopServer(child)
+    if (child) await stopServer(child)
     fs.rmSync(dataDir, { recursive: true, force: true })
   }
 }
