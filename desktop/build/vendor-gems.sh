@@ -3,7 +3,7 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"          # repo root
-RUBY_DIR="$HERE/../vendor/ruby-linux"
+RUBY_DIR="$HERE/../vendor/ruby"
 
 if [ ! -x "$RUBY_DIR/bin/ruby" ]; then
   echo "Bundled Ruby not found — run build/stage-ruby-linux.sh first." >&2

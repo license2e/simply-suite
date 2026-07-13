@@ -3,7 +3,7 @@ set -euo pipefail
 
 RUBY_VERSION="${RUBY_VERSION:-3.3.11}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
-DEST="$HERE/../vendor/ruby-linux"
+DEST="$HERE/../vendor/ruby"
 BUILD="$(mktemp -d)"
 trap 'rm -rf "$BUILD"' EXIT
 

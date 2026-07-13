@@ -20,7 +20,7 @@ extraResources:
       - "!node_modules/**"
       - "!tailwindcss"
   # The relocatable Ruby runtime → resources/ruby
-  - from: vendor/ruby-linux
+  - from: vendor/ruby
     to: ruby
 linux:
   target:
