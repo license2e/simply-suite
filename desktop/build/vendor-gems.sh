@@ -13,6 +13,13 @@ fi
 export PATH="$RUBY_DIR/bin:$PATH"
 cd "$ROOT"
 echo "Vendoring production gems with $(ruby -v)"
+
+# Isolate bundler's config to a throwaway dir (BUNDLE_APP_CONFIG) so `bundle
+# config set --local` does NOT clobber the repo's own .bundle/config (which
+# carries the dev BUNDLE_WITHOUT etc). Gems still install to ./vendor/bundle.
+export BUNDLE_APP_CONFIG="$(mktemp -d)"
+trap 'rm -rf "$BUNDLE_APP_CONFIG"' EXIT
+
 bundle config set --local path 'vendor/bundle'
 bundle config set --local without 'development test'
 bundle install --standalone
