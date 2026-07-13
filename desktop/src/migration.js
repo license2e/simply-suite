@@ -20,23 +20,21 @@ function verifyCopy(src, dest) {
 }
 
 // Move data from oldDir to newDir with verification. Copies, verifies
-// byte-for-byte, and ONLY THEN deletes oldDir. On any failure the partial
-// newDir is removed and oldDir is left intact; the error is re-thrown so the
-// caller can keep running on oldDir. Precondition: newDir is empty/new
-// (adopt/conflict cases are resolved by the caller).
+// byte-for-byte, and ONLY THEN deletes oldDir. On ANY failure — a copy error,
+// a verification mismatch, or an error thrown mid-verify — the partial newDir
+// is removed and oldDir is left intact; the error is re-thrown so the caller
+// can keep running on oldDir. Precondition: newDir is empty/new (adopt/conflict
+// cases are resolved by the caller).
 function migrate(oldDir, newDir) {
   try {
     copyTree(oldDir, newDir)
+    const result = verifyCopy(oldDir, newDir)
+    if (!result.ok) throw new Error(`verification failed: ${result.reason}`)
   } catch (e) {
-    removeTree(newDir)
-    throw new Error(`copy failed: ${e.message}`)
+    removeTree(newDir) // clean up the partial copy on ANY failure
+    throw e instanceof Error ? e : new Error(String(e))
   }
-  const result = verifyCopy(oldDir, newDir)
-  if (!result.ok) {
-    removeTree(newDir)
-    throw new Error(`verification failed: ${result.reason}`)
-  }
-  removeTree(oldDir)
+  removeTree(oldDir) // reached only after copy succeeded AND verify passed
 }
 
 module.exports = { verifyCopy, migrate }

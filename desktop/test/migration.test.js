@@ -36,3 +36,15 @@ test('migrate throws and preserves oldDir when the destination cannot be written
   assert.throws(() => migrate(old, dest))
   assert.strictEqual(fs.existsSync(path.join(old, 'f.txt')), true)
 })
+
+test('migrate cleans up newDir and preserves oldDir when verification fails', () => {
+  const old = tmp()
+  fs.writeFileSync(path.join(old, 'a.json'), '{"n":1}')
+  const nw = path.join(tmp(), 'dest')
+  fs.mkdirSync(nw, { recursive: true })
+  // Pre-seed an extra file so the post-copy file set differs → verifyCopy {ok:false}.
+  fs.writeFileSync(path.join(nw, 'extra.json'), 'not in source')
+  assert.throws(() => migrate(old, nw))
+  assert.strictEqual(fs.existsSync(nw), false) // partial copy cleaned up
+  assert.strictEqual(fs.readFileSync(path.join(old, 'a.json'), 'utf8'), '{"n":1}') // old intact
+})
