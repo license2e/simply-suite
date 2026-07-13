@@ -100,6 +100,15 @@ async function changeDataFolder() {
     return
   }
 
+  // Never migrate INTO a non-empty folder that isn't ours: migrate() would copy
+  // on top of the existing files and, on a verify mismatch, remove the whole
+  // folder — destroying unrelated data. Adopting an existing SS folder (marker
+  // present) is handled below; an empty or not-yet-created target is a fresh migrate.
+  if (!isDataFolder(newDir) && fs.existsSync(newDir) && fs.readdirSync(newDir).length > 0) {
+    showErrorBox('Folder not empty', `That folder already contains other files:\n${newDir}\n\nChoose an empty folder, or one that already holds Simply Suite data.`)
+    return
+  }
+
   const adoptExisting = isDataFolder(newDir)
   if (adoptExisting && !(await confirmAdopt(newDir))) return
 
