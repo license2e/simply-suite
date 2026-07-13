@@ -147,16 +147,35 @@ verification, old copy removed only after the new one is verified).
 
 ### Build the offline installer
 
-One-time build prerequisites (Linux): a C toolchain (`gcc`, `make`) plus
-`libssl-dev`, `libyaml-dev`, `zlib1g-dev` to compile Ruby.
+The build is per-OS — run it on the OS you are packaging for (you cannot
+cross-build Ruby). Each OS stages its own relocatable Ruby into
+`desktop/vendor/ruby`.
+
+**Linux** (prereqs: `gcc`, `make`, `libssl-dev`, `libyaml-dev`, `zlib1g-dev`):
 
     cd desktop
     npm install
-    npm run build:ruby   # compile a relocatable Ruby 3.3 into vendor/ruby-linux (~5-10 min)
-    npm run build:gems   # vendor production gems (standalone) against that Ruby
-    npm run dist         # package → desktop/dist/Simply Suite-<ver>.AppImage (+ .deb)
+    npm run build:ruby     # compile relocatable Ruby 3.3 (~5-10 min)
+    npm run build:gems
+    npm run dist           # → dist/Simply Suite-<ver>.AppImage (+ .deb)
 
-The artifact carries Ruby + gems inside it and runs on a machine with no Ruby.
+**macOS** (prereqs: Xcode command-line tools + Homebrew):
+
+    cd desktop
+    npm install
+    npm run build:ruby:mac # compiles Ruby for the host arch (arm64 or x86_64)
+    npm run build:gems
+    npm run dist           # → dist/Simply Suite-<ver>-<arch>.dmg
+
+**Windows** (PowerShell; downloads RubyInstaller+DevKit automatically):
+
+    cd desktop
+    npm install
+    npm run build:ruby:win
+    npm run build:gems:win
+    npm run dist           # → dist/Simply Suite Setup <ver>.exe
+
+Every build is unsigned; see "Installing an unsigned build" below.
 
 ### Running the AppImage
 
@@ -169,6 +188,17 @@ or run without installing anything:
 
     "./dist/Simply Suite-<ver>.AppImage" --appimage-extract-and-run
 
+### Installing an unsigned build
+
+These builds are not code-signed, so the OS shows a warning the first time.
+
+**macOS** — after dragging the app to Applications, clear the download
+quarantine flag (the right-click → Open bypass is unreliable on recent macOS):
+
+    xattr -dr com.apple.quarantine "/Applications/Simply Suite.app"
+
+**Windows** — on the SmartScreen prompt, click **More info → Run anyway**.
+
 ### Data location
 
 Per-user, outside the app bundle (survives reinstalls/upgrades):
@@ -178,6 +208,13 @@ Per-user, outside the app bundle (survives reinstalls/upgrades):
 - Windows: `%APPDATA%\Simply Suite\data`
 
 …or any writable folder you choose during onboarding or via File → Data folder….
+
+### Releases & CI
+
+Pushing a `v*` tag triggers the `desktop` GitHub Actions workflow, which builds
+Linux, macOS (arm64 + x86_64), and Windows installers and attaches them to a
+GitHub Release. Pull requests build the same matrix and upload the installers as
+workflow artifacts (no Release) so changes are validated on every platform.
 
 ## Routes
 
