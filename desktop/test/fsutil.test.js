@@ -24,9 +24,13 @@ test('copyTree reproduces files with identical checksums', () => {
   removeTree(src); removeTree(dest)
 })
 
-test('testWritable: true for a fresh dir, false for an unwritable path', () => {
+test('testWritable: true for a fresh dir, false when the parent is not a directory', () => {
   const d = tmp()
   assert.strictEqual(testWritable(d), true)
-  assert.strictEqual(testWritable('/proc/nonexistent/cannot'), false)
+  // Robust unwritable path: a child under a regular file. mkdir there fails
+  // ENOTDIR regardless of user/OS/sandbox — no /proc hang, no root-writable /root.
+  const blocker = path.join(tmp(), 'blocker')
+  fs.writeFileSync(blocker, 'i am a file, not a dir')
+  assert.strictEqual(testWritable(path.join(blocker, 'inside')), false)
   removeTree(d)
 })
