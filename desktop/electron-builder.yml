@@ -45,3 +45,5 @@ nsis:
   perMachine: false
 publish:
   provider: github
+  owner: license2e
+  repo: simply-suite
