@@ -11,6 +11,7 @@
     "test": "node --test",
     "smoke": "node build/smoke.js",
     "build:ruby": "bash build/stage-ruby-linux.sh",
+    "build:ruby:mac": "bash build/stage-ruby-mac.sh",
     "build:gems": "bash build/vendor-gems.sh",
     "dist": "electron-builder"
   },
