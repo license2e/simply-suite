@@ -9,6 +9,10 @@ require 'store'
 require 'sinatra/base'
 require 'base'
 
+map '/health' do
+  run ->(_env) { [200, { 'content-type' => 'text/plain' }, ['ok']] }
+end
+
 map '/clients'    do require 'clients';    run Clients    end
 map '/invoices'   do require 'invoices';   run Invoices   end
 map '/timesheets' do require 'timesheets'; run Timesheets end
