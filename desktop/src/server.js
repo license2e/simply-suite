@@ -1,5 +1,6 @@
 const net = require('net')
 const http = require('http')
+const os = require('os')
 const path = require('path')
 const { spawn } = require('child_process')
 
@@ -22,6 +23,27 @@ function rubyLauncher(appDir) {
   return { cmd: 'bundle', args: ['exec', 'ruby', path.join(appDir, 'desktop_boot.rb')] }
 }
 
+// A GUI/desktop launch context (or a shell without the version manager activated)
+// often lacks the PATH entries that make `ruby`/`bundle` resolvable — e.g. mise,
+// rbenv, asdf, or rvm shims — which surfaces as `spawn bundle ENOENT`. Prepend the
+// common ones so spawn() can find them. The packaged app uses an absolute
+// bundled-Ruby path and does not rely on this.
+function augmentedPath() {
+  const home = os.homedir()
+  const extra = [
+    path.join(home, '.local/share/mise/shims'),
+    path.join(home, '.local/bin'),
+    path.join(home, '.rbenv/shims'),
+    path.join(home, '.asdf/shims'),
+    path.join(home, '.rvm/bin'),
+    '/opt/homebrew/bin',
+    '/usr/local/bin',
+    '/usr/bin',
+    '/bin'
+  ]
+  return [...extra, process.env.PATH || ''].filter(Boolean).join(path.delimiter)
+}
+
 // Spawn the Ruby/Puma server. Returns the ChildProcess.
 function startServer({ appDir, dataDir, sessionSecret, port, logStream, launcher = rubyLauncher }) {
   const { cmd, args } = launcher(appDir)
@@ -29,6 +51,7 @@ function startServer({ appDir, dataDir, sessionSecret, port, logStream, launcher
     cwd: appDir,
     env: {
       ...process.env,
+      PATH: augmentedPath(),
       PORT: String(port),
       DATA_DIR: dataDir,
       SESSION_SECRET: sessionSecret,
