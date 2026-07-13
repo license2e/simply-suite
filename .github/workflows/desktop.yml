@@ -1,0 +1,107 @@
+name: desktop
+
+on:
+  push:
+    tags:
+      - 'v*'
+  pull_request:
+    paths:
+      - 'desktop/**'
+      - 'app/**'
+      - 'views/**'
+      - 'public/**'
+      - 'config.ru'
+      - 'desktop_boot.rb'
+      - 'Gemfile'
+      - 'Gemfile.lock'
+      - '.github/workflows/desktop.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  RUBY_VERSION: '3.3.11'
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            ruby_script: build:ruby
+            gems_script: build:gems
+            stage_file: build/stage-ruby-linux.sh
+          - os: macos-14        # Apple Silicon (arm64)
+            ruby_script: build:ruby:mac
+            gems_script: build:gems
+            stage_file: build/stage-ruby-mac.sh
+          - os: macos-13        # Intel (x86_64)
+            ruby_script: build:ruby:mac
+            gems_script: build:gems
+            stage_file: build/stage-ruby-mac.sh
+          - os: windows-latest  # x64
+            ruby_script: build:ruby:win
+            gems_script: build:gems:win
+            stage_file: build/stage-ruby-win.ps1
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Linux build deps
+        if: runner.os == 'Linux'
+        working-directory: .
+        run: sudo apt-get update && sudo apt-get install -y libssl-dev libyaml-dev zlib1g-dev
+
+      - name: Cache bundled Ruby
+        id: ruby-cache
+        uses: actions/cache@v4
+        with:
+          path: desktop/vendor/ruby
+          key: ruby-${{ runner.os }}-${{ runner.arch }}-${{ env.RUBY_VERSION }}-${{ hashFiles(format('desktop/{0}', matrix.stage_file)) }}
+
+      - name: Install JS deps
+        run: npm ci
+
+      - name: Stage Ruby
+        if: steps.ruby-cache.outputs.cache-hit != 'true'
+        run: npm run ${{ matrix.ruby_script }}
+
+      - name: Vendor gems
+        run: npm run ${{ matrix.gems_script }}
+
+      - name: Smoke test
+        run: npm run smoke
+
+      - name: Package (no publish)
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        run: npm run dist -- --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: Package and publish to Release
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        run: npm run dist -- --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: Upload build artifacts
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: simply-suite-${{ matrix.os }}-${{ runner.arch }}
+          path: |
+            desktop/dist/*.AppImage
+            desktop/dist/*.deb
+            desktop/dist/*.dmg
+            desktop/dist/*.exe
+          if-no-files-found: ignore
