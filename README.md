@@ -127,6 +127,58 @@ logo) or, once one exists, pick which business to work in. The chosen
 business is kept in the session — everything else (clients, invoices,
 timesheets) is scoped underneath it.
 
+## Desktop app
+
+Simply Suite can run as a self-contained desktop app: an Electron window that
+supervises the Sinatra/Puma server and renders the UI. The packaged build
+bundles its own Ruby runtime, so end users need no Ruby, Bundler, or mise. The
+Electron layer lives in `desktop/` and is additive — the web app is unchanged
+and still runs with `foreman` as above.
+
+### Run from source (needs Ruby + gems installed)
+
+    cd desktop
+    npm install
+    npm start          # first run asks where to store data, then opens the app
+
+It spawns the Sinatra app on a random loopback port and loads it in the window.
+Use **File → Data folder…** to move your data later (copied with checksum
+verification, old copy removed only after the new one is verified).
+
+### Build the offline installer
+
+One-time build prerequisites (Linux): a C toolchain (`gcc`, `make`) plus
+`libssl-dev`, `libyaml-dev`, `zlib1g-dev` to compile Ruby.
+
+    cd desktop
+    npm install
+    npm run build:ruby   # compile a relocatable Ruby 3.3 into vendor/ruby-linux (~5-10 min)
+    npm run build:gems   # vendor production gems (standalone) against that Ruby
+    npm run dist         # package → desktop/dist/Simply Suite-<ver>.AppImage (+ .deb)
+
+The artifact carries Ruby + gems inside it and runs on a machine with no Ruby.
+
+### Running the AppImage
+
+AppImages need FUSE 2. On modern Ubuntu/lubuntu (which ship FUSE 3 only),
+either install it once:
+
+    sudo apt install libfuse2         # then run the AppImage directly
+
+or run without installing anything:
+
+    "./dist/Simply Suite-<ver>.AppImage" --appimage-extract-and-run
+
+### Data location
+
+Per-user, outside the app bundle (survives reinstalls/upgrades):
+
+- Linux: `~/.config/Simply Suite/data`
+- macOS: `~/Library/Application Support/Simply Suite/data`
+- Windows: `%APPDATA%\Simply Suite\data`
+
+…or any writable folder you choose during onboarding or via File → Data folder….
+
 ## Routes
 
 | Path | Description |

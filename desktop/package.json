@@ -3,6 +3,8 @@
   "productName": "Simply Suite",
   "version": "0.1.0",
   "description": "Desktop shell for Simply Suite",
+  "author": "Ilya Shindyapin <ilya@doublenot.co>",
+  "homepage": "https://github.com/license2e/simply-suite",
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
