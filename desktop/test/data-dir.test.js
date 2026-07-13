@@ -25,3 +25,20 @@ test('resolveTarget nests a subfolder for a plain parent, uses SS folder in plac
   initializeDataFolder(existing)
   assert.strictEqual(resolveTarget(existing), existing)
 })
+
+test('initializeDataFolder does not overwrite an existing marker', () => {
+  const d = path.join(tmp(), 'store')
+  initializeDataFolder(d)
+  const markerPath = path.join(d, MARKER)
+  const custom = JSON.stringify({ app: 'simply-suite', schema: 1, sentinel: 'keep-me' })
+  fs.writeFileSync(markerPath, custom)
+  initializeDataFolder(d) // second call must be non-destructive
+  assert.strictEqual(fs.readFileSync(markerPath, 'utf8'), custom)
+})
+
+test('initializeDataFolder writes marker content {app, schema}', () => {
+  const d = path.join(tmp(), 'store')
+  initializeDataFolder(d)
+  const marker = JSON.parse(fs.readFileSync(path.join(d, MARKER), 'utf8'))
+  assert.deepStrictEqual(marker, { app: 'simply-suite', schema: 1 })
+})
