@@ -2,10 +2,12 @@ const { app } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const { loadSettings, saveSettings, getOrCreateSessionSecret } = require('./settings')
-const { defaultDataDir, initializeDataFolder } = require('./data-dir')
+const { defaultDataDir, initializeDataFolder, isDataFolder, resolveTarget } = require('./data-dir')
 const { pickFreePort, rubyLauncher, startServer, waitForHealth, stopServer } = require('./server')
 const { createSplash, closeSplash, createMainWindow } = require('./windows')
-const { runOnboarding, showErrorBox } = require('./dialogs')
+const { runOnboarding, chooseFolder, confirmAdopt, showErrorBox } = require('./dialogs')
+const { migrate } = require('./migration')
+const { testWritable } = require('./fsutil')
 const { buildMenu } = require('./menu')
 
 // Where the Ruby app lives: bundled under resources/app when packaged,
@@ -73,7 +75,7 @@ async function start() {
   } finally {
     closeSplash()
   }
-  buildMenu({ onChangeDataFolder: () => {} }) // completed in Task 13
+  buildMenu({ onChangeDataFolder: changeDataFolder })
 }
 
 async function gracefulQuit() {
@@ -82,6 +84,57 @@ async function gracefulQuit() {
   await stopServer(serverChild)
   serverChild = null
   app.quit()
+}
+
+// Change the data folder from the menu: pick → write-test → conflict check →
+// stop server → migrate (or adopt) → save → restart. Fail-safe: on migrate
+// failure the old data is untouched and the app restarts on it.
+async function changeDataFolder() {
+  const picked = await chooseFolder('Choose a new folder for Simply Suite data')
+  if (!picked) return
+  const newDir = resolveTarget(picked)
+  if (path.resolve(newDir) === path.resolve(currentDataDir)) return
+
+  if (!testWritable(newDir)) {
+    showErrorBox('Cannot use that folder', `Simply Suite can't write to:\n${newDir}`)
+    return
+  }
+
+  const adoptExisting = isDataFolder(newDir)
+  if (adoptExisting && !(await confirmAdopt(newDir))) return
+
+  const oldDir = currentDataDir
+  createSplash()
+  if (mainWindow) mainWindow.hide()
+  await stopServer(serverChild)
+  serverChild = null
+
+  let dataDir = oldDir
+  try {
+    if (adoptExisting) {
+      dataDir = newDir                 // switch only; leave old data in place
+    } else {
+      initializeDataFolder(newDir)
+      migrate(oldDir, newDir)          // copy → verify → delete old
+      dataDir = newDir
+    }
+    saveSettings(app.getPath('userData'), { ...loadSettings(app.getPath('userData')), dataDir })
+  } catch (e) {
+    dataDir = oldDir                    // migrate failed before deleting → old intact
+    showErrorBox('Data move failed', `${(e && e.message) || e}\n\nYour data was left in its original location.`)
+  }
+
+  try {
+    const url = await bootServer(dataDir)
+    if (mainWindow) mainWindow.loadURL(url)
+  } catch (e) {
+    showErrorBox('Simply Suite failed to restart', String((e && e.message) || e))
+    app.quit()
+    return
+  } finally {
+    if (mainWindow) mainWindow.show()
+    closeSplash()
+  }
 }
 
 if (!app.requestSingleInstanceLock()) {
