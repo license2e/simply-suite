@@ -9,6 +9,7 @@
   "scripts": {
     "start": "electron .",
     "test": "node --test",
+    "smoke": "node build/smoke.js",
     "build:ruby": "bash build/stage-ruby-linux.sh",
     "build:gems": "bash build/vendor-gems.sh",
     "dist": "electron-builder"
