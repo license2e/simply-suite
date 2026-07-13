@@ -12,3 +12,5 @@ data/
 desktop/node_modules/
 desktop/dist/
 desktop/vendor/
+/vendor/bundle/
+/.bundle/
