@@ -1,21 +1,23 @@
 name: desktop
 
+# CI is currently MANUAL-ONLY. Automatic builds on tags/PRs are disabled;
+# re-enable by uncommenting the push/pull_request triggers below.
 on:
-  push:
-    tags:
-      - 'v*'
-  pull_request:
-    paths:
-      - 'desktop/**'
-      - 'app/**'
-      - 'views/**'
-      - 'public/**'
-      - 'config.ru'
-      - 'desktop_boot.rb'
-      - 'Gemfile'
-      - 'Gemfile.lock'
-      - '.github/workflows/desktop.yml'
   workflow_dispatch:
+  # push:
+  #   tags:
+  #     - 'v*'
+  # pull_request:
+  #   paths:
+  #     - 'desktop/**'
+  #     - 'app/**'
+  #     - 'views/**'
+  #     - 'public/**'
+  #     - 'config.ru'
+  #     - 'desktop_boot.rb'
+  #     - 'Gemfile'
+  #     - 'Gemfile.lock'
+  #     - '.github/workflows/desktop.yml'
 
 permissions:
   contents: write
