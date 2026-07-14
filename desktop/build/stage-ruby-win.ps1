@@ -27,6 +27,7 @@ Start-Process -FilePath $Exe -ArgumentList @('/verysilent','/norestart',"/dir=$D
 
 & "$Dest\bin\ruby.exe" -v
 & "$Dest\bin\gem.cmd" install bundler --no-document --force
+if ($LASTEXITCODE -ne 0) { throw "gem install bundler failed (exit $LASTEXITCODE)" }
 Write-Host "Bundled Ruby (Windows) ready."
 
 Remove-Item -Recurse -Force $Tmp

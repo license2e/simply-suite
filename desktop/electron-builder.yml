@@ -19,9 +19,17 @@ extraResources:
       - "!dist/**"
       - "!node_modules/**"
       - "!tailwindcss"
-  # The relocatable Ruby runtime → resources/ruby
+  # The relocatable Ruby runtime → resources/ruby.
+  # Exclude msys64: the MSYS2/MinGW *build* toolchain (~1.5-2.5 GB) is only
+  # needed to COMPILE native gems on Windows; RubyInstaller ships its runtime
+  # DLLs under bin/, so the packaged app runs without it. No-op on Linux/mac
+  # (they have no msys64). Keeps the Windows NSIS installer from ballooning past
+  # GitHub's release-asset size limit.
   - from: vendor/ruby
     to: ruby
+    filter:
+      - "**/*"
+      - "!msys64/**"
 linux:
   target:
     - AppImage

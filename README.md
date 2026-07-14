@@ -211,10 +211,14 @@ Per-user, outside the app bundle (survives reinstalls/upgrades):
 
 ### Releases & CI
 
-Pushing a `v*` tag triggers the `desktop` GitHub Actions workflow, which builds
-Linux, macOS (arm64 + x86_64), and Windows installers and attaches them to a
-GitHub Release. Pull requests build the same matrix and upload the installers as
-workflow artifacts (no Release) so changes are validated on every platform.
+A GitHub Actions workflow (`.github/workflows/desktop.yml`) builds Linux, macOS
+(arm64 + x86_64), and Windows installers. It is currently **manual-only**
+(`workflow_dispatch`) — run it from the repository's Actions tab to build all
+platforms and upload the installers as workflow artifacts. To enable automatic
+builds, uncomment the `push` (tag `v*`) and `pull_request` triggers in the
+workflow: a `v*` tag then publishes the installers to a GitHub Release, and pull
+requests that touch the app or `desktop/` files build the matrix and upload
+artifacts.
 
 ## Routes
 

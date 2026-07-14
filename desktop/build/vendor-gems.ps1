@@ -23,6 +23,8 @@ Write-Host "Vendoring production gems with $(& "$RubyDir\bin\ruby.exe" -v)"
 & "$RubyDir\bin\bundle.cmd" config set --local path 'vendor/bundle'
 & "$RubyDir\bin\bundle.cmd" config set --local without 'development test'
 & "$RubyDir\bin\bundle.cmd" install --standalone
+if ($LASTEXITCODE -ne 0) { throw "bundle install --standalone failed (exit $LASTEXITCODE)" }
 
 if (Test-Path "$Root\vendor\bundle\bundler\setup.rb") { Write-Host "Standalone bundle ready." }
+else { throw "vendor/bundle/bundler/setup.rb missing after bundle install" }
 Remove-Item -Recurse -Force $env:BUNDLE_APP_CONFIG
